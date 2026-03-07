@@ -4,102 +4,140 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>StayHia</title>
+  <link rel="icon" type="image/jpeg" href="/assets/stayhia-icon.jpg" />
   <style>
-    :root{--bg:#0b1020;--card:#121a33;--line:#2b355f;--text:#f5f7ff;--muted:#b9c2df;--accent:#5ea1ff}
+    :root{
+      --navy:#0a1333;
+      --navy-2:#111d46;
+      --card:#ffffff;
+      --text:#0f1b42;
+      --muted:#5e6789;
+      --accent:#ff5f75;
+      --accent-2:#ff9f4d;
+      --line:#e8ecf8;
+      --shadow:0 10px 30px rgba(16,31,86,.10);
+    }
     *{box-sizing:border-box}
-    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
-    .wrap{max-width:1080px;margin:0 auto;padding:20px}
-    .nav{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
-    .brand{font-weight:800;font-size:28px}
-    .btn{border:1px solid var(--line);background:#18244a;color:#d9e7ff;padding:8px 12px;border-radius:999px;cursor:pointer;text-decoration:none;display:inline-block}
-    .grid{display:grid;grid-template-columns:1.2fr .8fr;gap:16px;margin-top:16px}
-    .card{border:1px solid var(--line);background:var(--card);border-radius:16px;padding:18px}
-    h1,h2,h3{margin:.2rem 0 .6rem}
-    p{color:var(--muted);line-height:1.5}
-    .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-    .kpi{padding:12px;border:1px solid var(--line);border-radius:12px;background:#0f1836}
-    .kpi b{display:block;font-size:22px;color:white}
-    input,select{width:100%;margin-top:6px;padding:10px;border-radius:10px;border:1px solid #314176;background:#0d1530;color:#eaf0ff}
-    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .list{display:grid;gap:10px}
-    .item{padding:12px;border:1px solid var(--line);border-radius:12px;background:#0f1836}
-    .footer{opacity:.8;font-size:13px;margin-top:16px}
-    @media (max-width:900px){.grid{grid-template-columns:1fr}.kpis{grid-template-columns:1fr 1fr}.row{grid-template-columns:1fr}}
+    body{
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      color:var(--text);
+      background:linear-gradient(180deg,#f6f8ff 0%, #f2f5ff 100%);
+    }
+    .wrap{max-width:1140px;margin:0 auto;padding:20px}
+    .topbar{
+      display:flex;align-items:center;justify-content:space-between;
+      background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px 14px;
+      box-shadow:var(--shadow);
+      position:sticky;top:12px;z-index:20;
+    }
+    .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:21px}
+    .brand img{width:34px;height:34px;border-radius:10px;object-fit:cover}
+    .nav{display:flex;gap:8px;flex-wrap:wrap}
+    .chip{border:1px solid var(--line);background:#fff;padding:8px 12px;border-radius:999px;color:#203062;text-decoration:none;font-weight:600}
+
+    .hero{
+      margin-top:16px;background:linear-gradient(140deg,var(--navy) 0%, #1b2d6b 60%, #223e8e 100%);
+      border-radius:24px;padding:26px;color:#fff;box-shadow:var(--shadow);
+      display:grid;grid-template-columns:1.2fr .8fr;gap:18px;align-items:center;
+    }
+    .hero h1{font-size:40px;line-height:1.05;margin:0 0 10px}
+    .hero p{color:#dbe6ff;margin:0 0 16px;max-width:560px;line-height:1.5}
+    .hero .cta{display:flex;gap:10px;flex-wrap:wrap}
+    .btn{
+      border:0;border-radius:12px;padding:11px 16px;font-weight:700;cursor:pointer;
+      text-decoration:none;display:inline-block
+    }
+    .btn-primary{background:linear-gradient(135deg,var(--accent-2),var(--accent));color:#fff}
+    .btn-secondary{background:#ffffff1a;color:#fff;border:1px solid #ffffff3b}
+    .wordmark-card{background:#fff;border-radius:18px;padding:14px;border:1px solid #ffffff3a}
+    .wordmark-card img{width:100%;border-radius:12px;display:block}
+
+    .grid{margin-top:16px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:var(--shadow)}
+    .card h3{margin:0 0 6px}
+    .card p{margin:0;color:var(--muted);line-height:1.45}
+
+    .status{margin-top:16px;display:grid;grid-template-columns:2fr 1fr;gap:14px}
+    .kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+    .kpi .box{background:#f9fbff;border:1px solid var(--line);border-radius:12px;padding:12px}
+    .kpi b{display:block;font-size:24px;color:#12204e}
+    .sub{font-size:13px;color:var(--muted)}
+    .footer{margin:18px 0 6px;color:#7e87ab;font-size:13px;text-align:center}
+
+    @media (max-width:980px){
+      .hero{grid-template-columns:1fr}
+      .status{grid-template-columns:1fr}
+      .grid{grid-template-columns:1fr 1fr}
+    }
+    @media (max-width:680px){
+      .wrap{padding:14px}
+      .hero h1{font-size:32px}
+      .grid,.kpi{grid-template-columns:1fr}
+      .topbar{position:static}
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <div class="nav">
-      <div class="brand">StayHia</div>
-      <div>
-        <a class="btn" href="#" data-route="/">Home</a>
-        <a class="btn" href="#" data-route="/search">Search</a>
-        <a class="btn" href="#" data-route="/listing">Listing</a>
-        <a class="btn" href="#" data-route="/checkout">Checkout</a>
+    <header class="topbar">
+      <div class="brand">
+        <img src="/assets/stayhia-icon.jpg" alt="StayHia icon" />
+        <span>StayHia</span>
       </div>
-    </div>
+      <nav class="nav">
+        <a class="chip" href="#">Search</a>
+        <a class="chip" href="#">Listing</a>
+        <a class="chip" href="#">Checkout</a>
+      </nav>
+    </header>
 
-    <div id="app"></div>
-    <div class="footer">Live shell deployed • API target: api.stayhia.com (DNS propagation in progress)</div>
+    <section class="hero">
+      <div>
+        <h1>Stay Here.<br/>Stay Anywhere.</h1>
+        <p>A premium accommodation marketplace experience is now live. We’ve applied your brand system with cleaner spacing, stronger visuals, and a more modern trust-forward layout.</p>
+        <div class="cta">
+          <a class="btn btn-primary" href="#">Start Exploring</a>
+          <a class="btn btn-secondary" href="https://github.com/akhenkofi/StayHia" target="_blank">View Build Repo</a>
+        </div>
+      </div>
+      <div class="wordmark-card">
+        <img src="/assets/stayhia-wordmark.jpg" alt="StayHia main logo" />
+      </div>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <h3>Smart Search</h3>
+        <p>Search flow shell is in place and styled for fast mobile use. Next pass connects ranking and filters.</p>
+      </article>
+      <article class="card">
+        <h3>Listing Experience</h3>
+        <p>Listing detail layout is prepared for rich photos, pricing blocks, and trust indicators.</p>
+      </article>
+      <article class="card">
+        <h3>Checkout Clarity</h3>
+        <p>Fee snapshot and policy visibility are emphasized to keep booking trust transparent.</p>
+      </article>
+    </section>
+
+    <section class="status">
+      <article class="card">
+        <h3>Live Build Status</h3>
+        <p>Domain is connected and serving this new homepage design. API verification is configured and progressing through DNS/runtime finalization.</p>
+        <div class="kpi">
+          <div class="box"><b>Live</b><span class="sub">Homepage deployed</span></div>
+          <div class="box"><b>Brand</b><span class="sub">Logo system applied</span></div>
+          <div class="box"><b>Next</b><span class="sub">Full funnel wiring</span></div>
+        </div>
+      </article>
+      <article class="card">
+        <h3>Identity Rules</h3>
+        <p>✅ Icon-only logo for app icon/favicon/header mark<br/>✅ Full wordmark on homepage and primary branding surfaces</p>
+      </article>
+    </section>
+
+    <p class="footer">StayHia • Premium booking experience in active build sprint</p>
   </div>
-
-  <script>
-    const app = document.getElementById('app');
-    const views = {
-      '/': `
-        <div class="grid">
-          <div class="card">
-            <h1>Stay Here. Stay Anywhere.</h1>
-            <p>Frontend shell is now live on domain. Core guest funnel pages are active as placeholders while full booking logic is being wired.</p>
-            <div class="kpis">
-              <div class="kpi"><b>Live</b><span>Domain deployment</span></div>
-              <div class="kpi"><b>v0</b><span>Booking runtime</span></div>
-              <div class="kpi"><b>Next</b><span>Full flow wiring</span></div>
-            </div>
-          </div>
-          <div class="card">
-            <h3>Quick Actions</h3>
-            <div class="list">
-              <button class="btn" data-route="/search">Find stays</button>
-              <button class="btn" data-route="/listing">View listing template</button>
-              <button class="btn" data-route="/checkout">Open checkout shell</button>
-            </div>
-          </div>
-        </div>`,
-      '/search': `
-        <div class="card">
-          <h2>Search stays</h2>
-          <div class="row">
-            <label>Location<input placeholder="Accra, Ghana"></label>
-            <label>Dates<input placeholder="Check-in → Check-out"></label>
-          </div>
-          <div class="row">
-            <label>Guests<select><option>1 guest</option><option>2 guests</option><option>4 guests</option></select></label>
-            <label>Price range<select><option>Any</option><option>$0-$100</option><option>$100-$300</option></select></label>
-          </div>
-          <p style="margin-top:10px">Search ranking and filters are being connected to live backend next.</p>
-        </div>`,
-      '/listing': `
-        <div class="card">
-          <h2>Listing detail (shell)</h2>
-          <div class="item"><b>Harmony Bay Villa</b><p>2 bed • 2 bath • ocean view • instant booking (coming online)</p></div>
-          <div class="item"><b>Price snapshot</b><p>Nightly, cleaning, service fee, taxes, cancellation terms (immutable snapshot at checkout)</p></div>
-          <div class="item"><b>Trust</b><p>Host verification, review quality, and risk flags in progress.</p></div>
-        </div>`,
-      '/checkout': `
-        <div class="card">
-          <h2>Checkout (shell)</h2>
-          <div class="item"><b>Fee breakdown</b><p>Nightly: $220 • Cleaning: $25 • Service: $18 • Taxes: $12</p></div>
-          <div class="item"><b>Policy snapshot</b><p>Cancellation + refund versioning will freeze at booking time.</p></div>
-          <button class="btn">Confirm & Pay (coming online)</button>
-        </div>`
-    };
-
-    function render(path){ app.innerHTML = views[path] || views['/']; bind(); }
-    function route(path){ history.pushState({},'',path); render(path); }
-    function bind(){ document.querySelectorAll('[data-route]').forEach(el=>el.onclick=(e)=>{e.preventDefault(); route(el.getAttribute('data-route'));}); }
-    window.onpopstate=()=>render(location.pathname);
-    render(location.pathname);
-  </script>
 </body>
 </html>
