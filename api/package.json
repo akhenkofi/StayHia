@@ -1,0 +1,10 @@
+{
+  "name": "stayhia-api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "StayHia API parity skeleton",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js"
+  }
+}
