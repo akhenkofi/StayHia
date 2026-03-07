@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StayHia</title>
+  <style>
+    :root{--bg:#0b1020;--card:#121a33;--line:#2b355f;--text:#f5f7ff;--muted:#b9c2df;--accent:#5ea1ff}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+    .wrap{max-width:1080px;margin:0 auto;padding:20px}
+    .nav{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+    .brand{font-weight:800;font-size:28px}
+    .btn{border:1px solid var(--line);background:#18244a;color:#d9e7ff;padding:8px 12px;border-radius:999px;cursor:pointer;text-decoration:none;display:inline-block}
+    .grid{display:grid;grid-template-columns:1.2fr .8fr;gap:16px;margin-top:16px}
+    .card{border:1px solid var(--line);background:var(--card);border-radius:16px;padding:18px}
+    h1,h2,h3{margin:.2rem 0 .6rem}
+    p{color:var(--muted);line-height:1.5}
+    .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .kpi{padding:12px;border:1px solid var(--line);border-radius:12px;background:#0f1836}
+    .kpi b{display:block;font-size:22px;color:white}
+    input,select{width:100%;margin-top:6px;padding:10px;border-radius:10px;border:1px solid #314176;background:#0d1530;color:#eaf0ff}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .list{display:grid;gap:10px}
+    .item{padding:12px;border:1px solid var(--line);border-radius:12px;background:#0f1836}
+    .footer{opacity:.8;font-size:13px;margin-top:16px}
+    @media (max-width:900px){.grid{grid-template-columns:1fr}.kpis{grid-template-columns:1fr 1fr}.row{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="nav">
+      <div class="brand">StayHia</div>
+      <div>
+        <a class="btn" href="#" data-route="/">Home</a>
+        <a class="btn" href="#" data-route="/search">Search</a>
+        <a class="btn" href="#" data-route="/listing">Listing</a>
+        <a class="btn" href="#" data-route="/checkout">Checkout</a>
+      </div>
+    </div>
+
+    <div id="app"></div>
+    <div class="footer">Live shell deployed • API target: api.stayhia.com (DNS propagation in progress)</div>
+  </div>
+
+  <script>
+    const app = document.getElementById('app');
+    const views = {
+      '/': `
+        <div class="grid">
+          <div class="card">
+            <h1>Stay Here. Stay Anywhere.</h1>
+            <p>Frontend shell is now live on domain. Core guest funnel pages are active as placeholders while full booking logic is being wired.</p>
+            <div class="kpis">
+              <div class="kpi"><b>Live</b><span>Domain deployment</span></div>
+              <div class="kpi"><b>v0</b><span>Booking runtime</span></div>
+              <div class="kpi"><b>Next</b><span>Full flow wiring</span></div>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Quick Actions</h3>
+            <div class="list">
+              <button class="btn" data-route="/search">Find stays</button>
+              <button class="btn" data-route="/listing">View listing template</button>
+              <button class="btn" data-route="/checkout">Open checkout shell</button>
+            </div>
+          </div>
+        </div>`,
+      '/search': `
+        <div class="card">
+          <h2>Search stays</h2>
+          <div class="row">
+            <label>Location<input placeholder="Accra, Ghana"></label>
+            <label>Dates<input placeholder="Check-in → Check-out"></label>
+          </div>
+          <div class="row">
+            <label>Guests<select><option>1 guest</option><option>2 guests</option><option>4 guests</option></select></label>
+            <label>Price range<select><option>Any</option><option>$0-$100</option><option>$100-$300</option></select></label>
+          </div>
+          <p style="margin-top:10px">Search ranking and filters are being connected to live backend next.</p>
+        </div>`,
+      '/listing': `
+        <div class="card">
+          <h2>Listing detail (shell)</h2>
+          <div class="item"><b>Harmony Bay Villa</b><p>2 bed • 2 bath • ocean view • instant booking (coming online)</p></div>
+          <div class="item"><b>Price snapshot</b><p>Nightly, cleaning, service fee, taxes, cancellation terms (immutable snapshot at checkout)</p></div>
+          <div class="item"><b>Trust</b><p>Host verification, review quality, and risk flags in progress.</p></div>
+        </div>`,
+      '/checkout': `
+        <div class="card">
+          <h2>Checkout (shell)</h2>
+          <div class="item"><b>Fee breakdown</b><p>Nightly: $220 • Cleaning: $25 • Service: $18 • Taxes: $12</p></div>
+          <div class="item"><b>Policy snapshot</b><p>Cancellation + refund versioning will freeze at booking time.</p></div>
+          <button class="btn">Confirm & Pay (coming online)</button>
+        </div>`
+    };
+
+    function render(path){ app.innerHTML = views[path] || views['/']; bind(); }
+    function route(path){ history.pushState({},'',path); render(path); }
+    function bind(){ document.querySelectorAll('[data-route]').forEach(el=>el.onclick=(e)=>{e.preventDefault(); route(el.getAttribute('data-route'));}); }
+    window.onpopstate=()=>render(location.pathname);
+    render(location.pathname);
+  </script>
+</body>
+</html>
