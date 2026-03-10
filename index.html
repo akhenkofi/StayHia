@@ -160,12 +160,13 @@
       <h2 id="search-title">Find your perfect stay</h2>
       <p class="muted">Search by destination, travel dates, and guest count to discover the best match.</p>
       <div class="search-row">
-        <input class="input" value="Accra, Ghana" aria-label="Destination" />
-        <input class="input" value="Mar 18 → Mar 22" aria-label="Dates" />
-        <input class="input" value="2 Guests" aria-label="Guests" />
-        <input class="input" value="Entire place" aria-label="Type" />
+        <input id="search-destination" class="input" value="Accra, Ghana" aria-label="Destination" />
+        <input id="search-dates" class="input" value="Mar 18 → Mar 22" aria-label="Dates" />
+        <input id="search-guests" class="input" value="2 Guests" aria-label="Guests" />
+        <input id="search-type" class="input" value="Entire place" aria-label="Type" />
         <button id="search-quote-btn" class="btn btn-primary" type="button">Get Live Quote</button>
       </div>
+      <p id="search-results-meta" class="muted">Ranking: recommended for your current filters.</p>
       <div class="layout">
         <article class="card">
           <h3>Featured stays in Ghana</h3>
@@ -445,6 +446,7 @@
 
     const ghanaListings = [
       { listingId:'listing_harmony_bay_loft', name:'Harmony Bay Loft', area:'Volta Region • New Las Vegas Ghana', hostId:'host_ama', host:'Ama', rating:4.93, nightly:132, image:'https://images.unsplash.com/photo-1430285561322-7808604715df?auto=format&fit=crop&w=1600&q=80', amenities:'Ocean view • Dedicated workspace • Fast Wi‑Fi • Self check‑in • Free parking', superhost:true, guestFavorite:true, reviews:164 },
+      { listingId:'listing_airbnb_1259796480349397604', name:'Luxurious Penthouse | Gated | 15 min Airport Spintex', area:'Accra • Greater Accra Region', hostId:'host_nlv_001', host:'New Las Vegas Ghana', rating:4.95, nightly:158, image:'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1600&q=80', amenities:'Gated residence • Airport access • Premium interiors • Fast Wi‑Fi • Smart check-in', superhost:true, guestFavorite:true, reviews:120 },
       { listingId:'listing_amarna_hill_villa', name:'Amarna Hill Villa', area:'Volta Region • New Las Vegas Ghana', hostId:'host_kwame', host:'Kwame', rating:4.88, nightly:148, image:'https://images.unsplash.com/photo-1605146769289-440113cc3d00?auto=format&fit=crop&w=1600&q=80', amenities:'Hill view • 3BR • Balcony • Chef-ready kitchen • Backup power' },
       { listingId:'listing_keta_lagoon_suite', name:'Keta Lagoon Suite', area:'Volta Region', hostId:'host_efua', host:'Efua', rating:4.74, nightly:96, image:'https://images.unsplash.com/photo-1600607687644-aac4c3eac7f4?auto=format&fit=crop&w=1600&q=80', amenities:'Lagoon access • AC • Breakfast • Wi‑Fi' },
       { listingId:'listing_ho_city_modern_flat', name:'Ho City Modern Flat', area:'Volta Region', hostId:'host_kofi', host:'Kofi', rating:4.69, nightly:78, image:'https://images.unsplash.com/photo-1600210492493-0946911123ea?auto=format&fit=crop&w=1600&q=80', amenities:'City center • Fast internet • Smart TV • Parking' },
@@ -505,6 +507,11 @@
     const notifEventCancelledInput = document.getElementById('notif-event-cancelled');
     const notifQuietCriticalOnlyInput = document.getElementById('notif-quiet-critical-only');
     const notificationPrefsStatusEl = document.getElementById('notification-prefs-status');
+    const searchDestinationInput = document.getElementById('search-destination');
+    const searchDatesInput = document.getElementById('search-dates');
+    const searchGuestsInput = document.getElementById('search-guests');
+    const searchTypeInput = document.getElementById('search-type');
+    const searchResultsMetaEl = document.getElementById('search-results-meta');
 
     let currentQuote = null;
     let currentBooking = null;
@@ -512,7 +519,8 @@
     let appMode = localStorage.getItem('stayhia_mode') || 'traveling';
 
     function getRoute() {
-      const raw = (location.hash || '#/search').replace('#/', '').trim().toLowerCase();
+      const routeChunk = (location.hash || '#/search').replace('#/', '').split('?')[0];
+      const raw = String(routeChunk || 'search').trim().toLowerCase();
       return views[raw] ? raw : 'search';
     }
 
@@ -568,9 +576,78 @@
       hostPricingStatusEl.textContent = `Pricing mode: ${cfg.mode} • Effective nightly: $${nightly}`;
     }
 
+    function readSearchFiltersFromHash() {
+      const hash = location.hash || '#/search';
+      const query = hash.includes('?') ? hash.slice(hash.indexOf('?') + 1) : '';
+      const params = new URLSearchParams(query);
+      return {
+        destination: params.get('destination') || '',
+        dates: params.get('dates') || '',
+        guests: params.get('guests') || '',
+        type: params.get('type') || ''
+      };
+    }
+
+    function collectSearchFilters() {
+      return {
+        destination: (searchDestinationInput?.value || '').trim(),
+        dates: (searchDatesInput?.value || '').trim(),
+        guests: (searchGuestsInput?.value || '').trim(),
+        type: (searchTypeInput?.value || '').trim()
+      };
+    }
+
+    function applySearchFiltersToInputs(filters) {
+      if (filters.destination && searchDestinationInput) searchDestinationInput.value = filters.destination;
+      if (filters.dates && searchDatesInput) searchDatesInput.value = filters.dates;
+      if (filters.guests && searchGuestsInput) searchGuestsInput.value = filters.guests;
+      if (filters.type && searchTypeInput) searchTypeInput.value = filters.type;
+    }
+
+    function persistSearchFiltersToHash() {
+      if (getRoute() !== 'search') return;
+      const filters = collectSearchFilters();
+      const params = new URLSearchParams();
+      if (filters.destination) params.set('destination', filters.destination);
+      if (filters.dates) params.set('dates', filters.dates);
+      if (filters.guests) params.set('guests', filters.guests);
+      if (filters.type) params.set('type', filters.type);
+      const query = params.toString();
+      const targetHash = query ? `#/search?${query}` : '#/search';
+      if (location.hash !== targetHash) {
+        history.replaceState(null, '', targetHash);
+      }
+    }
+
+    function scoreListingForSearch(listing, filters) {
+      const destination = String(filters.destination || '').toLowerCase();
+      const type = String(filters.type || '').toLowerCase();
+      const listingText = `${listing.name} ${listing.area} ${listing.amenities}`.toLowerCase();
+      const destinationMatched = !destination || destination.split(/[\s,]+/).filter(Boolean).every(token => listingText.includes(token));
+      if (!destinationMatched) return { score: -Infinity, destinationMatched: false };
+      let score = 0;
+      score += listing.rating * 120;
+      score += Math.min(Number(listing.reviews || 0), 250) * 0.8;
+      score += listing.superhost ? 18 : 0;
+      score += listing.guestFavorite ? 14 : 0;
+      score -= getEffectiveNightly(listing) * 0.22;
+      if (type.includes('entire')) score += 6;
+      return { score, destinationMatched: true };
+    }
+
     function renderListings() {
       searchListingsEl.innerHTML = '';
-      ghanaListings.forEach((l) => {
+      const filters = collectSearchFilters();
+      const scored = ghanaListings
+        .map((l) => ({ listing: l, ...scoreListingForSearch(l, filters) }))
+        .filter((row) => row.destinationMatched)
+        .sort((a, b) => (b.score - a.score) || a.listing.listingId.localeCompare(b.listing.listingId));
+      const rankedListings = scored.map((row) => row.listing);
+      if (searchResultsMetaEl) {
+        const destinationHint = filters.destination ? ` for “${filters.destination}”` : '';
+        searchResultsMetaEl.textContent = `Ranking: ${rankedListings.length} recommended result(s)${destinationHint}, sorted by trust + relevance + value.`;
+      }
+      rankedListings.forEach((l) => {
         const nightly = getEffectiveNightly(l);
         const card = document.createElement('div');
         card.className = 'listing-card';
@@ -598,6 +675,10 @@
         };
         searchListingsEl.appendChild(card);
       });
+      if (!rankedListings.length) {
+        selectedListing = null;
+        searchListingsEl.innerHTML = '<p class="muted">No listings match that destination yet. Try Accra, Volta, or Central Region.</p>';
+      }
       if (selectedListing) {
         selectedListingSummaryEl.textContent = `${selectedListing.name} (${selectedListing.area}) selected.`;
         listingNameEl.textContent = selectedListing.name;
@@ -970,6 +1051,13 @@
 
     travelerTabBtns.forEach(btn => btn.addEventListener('click', () => setTravelerPane(btn.dataset.travelerPane || 'explore')));
 
+    [searchDestinationInput, searchDatesInput, searchGuestsInput, searchTypeInput].forEach((input) => {
+      input?.addEventListener('change', () => {
+        persistSearchFiltersToHash();
+        renderListings();
+      });
+    });
+
     document.getElementById('search-quote-btn')?.addEventListener('click', createQuote);
     document.getElementById('create-quote-btn')?.addEventListener('click', createQuote);
     document.getElementById('create-booking-btn')?.addEventListener('click', createBooking);
@@ -1008,6 +1096,11 @@
 
     window.addEventListener('hashchange', () => {
       renderRoute();
+      if (getRoute() === 'search') {
+        applySearchFiltersToInputs(readSearchFiltersFromHash());
+        renderListings();
+        persistSearchFiltersToHash();
+      }
       if (getRoute() === 'host') {
         setHostPane('today');
         renderHostShellLists();
@@ -1017,6 +1110,8 @@
     });
     applyMode();
     setTravelerPane('explore');
+    applySearchFiltersToInputs(readSearchFiltersFromHash());
+    persistSearchFiltersToHash();
     renderListings();
     renderHostShellLists();
     renderRoute();
