@@ -16,47 +16,48 @@
       --accent-2:#ff9f4d;
       --line:#e8ecf8;
       --shadow:0 10px 30px rgba(16,31,86,.10);
+      --ok:#1d8f64;
+      --warn:#b46c14;
+      --info:#2746a0;
     }
     *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      color:var(--text);
-      background:linear-gradient(180deg,#f6f8ff 0%, #f2f5ff 100%);
-    }
+    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--text);background:linear-gradient(180deg,#f6f8ff 0%, #f2f5ff 100%)}
     .wrap{max-width:1140px;margin:0 auto;padding:20px}
-    .topbar{
-      display:flex;align-items:center;justify-content:space-between;
-      background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px 14px;
-      box-shadow:var(--shadow);
-      position:sticky;top:12px;z-index:20;
-    }
+    .topbar{display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px 14px;box-shadow:var(--shadow);position:sticky;top:12px;z-index:20}
     .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:21px}
     .brand img{width:34px;height:34px;border-radius:10px;object-fit:cover}
     .nav{display:flex;gap:8px;flex-wrap:wrap}
-    .chip{border:1px solid var(--line);background:#fff;padding:8px 12px;border-radius:999px;color:#203062;text-decoration:none;font-weight:600}
+    .chip{border:1px solid var(--line);background:#fff;padding:8px 12px;border-radius:999px;color:#203062;text-decoration:none;font-weight:700;cursor:pointer}
+    .chip.active{background:#eef3ff;border-color:#cfdafe;color:#162a62}
 
-    .hero{
-      margin-top:16px;background:linear-gradient(140deg,var(--navy) 0%, #1b2d6b 60%, #223e8e 100%);
-      border-radius:24px;padding:26px;color:#fff;box-shadow:var(--shadow);
-      display:grid;grid-template-columns:1.2fr .8fr;gap:18px;align-items:center;
-    }
+    .hero{margin-top:16px;background:linear-gradient(140deg,var(--navy) 0%, #1b2d6b 60%, #223e8e 100%);border-radius:24px;padding:26px;color:#fff;box-shadow:var(--shadow);display:grid;grid-template-columns:1.2fr .8fr;gap:18px;align-items:center}
     .hero h1{font-size:40px;line-height:1.05;margin:0 0 10px}
     .hero p{color:#dbe6ff;margin:0 0 16px;max-width:560px;line-height:1.5}
     .hero .cta{display:flex;gap:10px;flex-wrap:wrap}
-    .btn{
-      border:0;border-radius:12px;padding:11px 16px;font-weight:700;cursor:pointer;
-      text-decoration:none;display:inline-block
-    }
+    .btn{border:0;border-radius:12px;padding:11px 16px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block}
     .btn-primary{background:linear-gradient(135deg,var(--accent-2),var(--accent));color:#fff}
     .btn-secondary{background:#ffffff1a;color:#fff;border:1px solid #ffffff3b}
     .wordmark-card{background:#fff;border-radius:18px;padding:14px;border:1px solid #ffffff3a}
     .wordmark-card img{width:100%;border-radius:12px;display:block}
 
-    .grid{margin-top:16px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-    .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:var(--shadow)}
-    .card h3{margin:0 0 6px}
-    .card p{margin:0;color:var(--muted);line-height:1.45}
+    .panel{margin-top:16px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:var(--shadow)}
+    .panel h2{margin:0 0 8px}
+    .muted{color:var(--muted)}
+
+    .view{display:none}
+    .view.active{display:block}
+
+    .search-row{display:grid;grid-template-columns:1.2fr .8fr .7fr .7fr auto;gap:10px;margin-top:12px}
+    .input{border:1px solid var(--line);border-radius:12px;padding:12px;background:#f9fbff;color:var(--text);font-weight:600;width:100%}
+
+    .layout{display:grid;grid-template-columns:1.4fr .9fr;gap:14px;margin-top:12px}
+    .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px}
+    .price-grid{display:grid;grid-template-columns:1fr auto;gap:8px 12px;align-items:center}
+    .line{height:1px;background:var(--line);margin:8px 0}
+    .pill{display:inline-block;padding:5px 9px;border-radius:999px;font-size:12px;font-weight:700}
+    .pill.ok{background:#e9f8f1;color:var(--ok)}
+    .pill.warn{background:#fff4e7;color:var(--warn)}
+    .pill.info{background:#edf2ff;color:var(--info)}
 
     .status{margin-top:16px;display:grid;grid-template-columns:2fr 1fr;gap:14px}
     .kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
@@ -65,17 +66,8 @@
     .sub{font-size:13px;color:var(--muted)}
     .footer{margin:18px 0 6px;color:#7e87ab;font-size:13px;text-align:center}
 
-    @media (max-width:980px){
-      .hero{grid-template-columns:1fr}
-      .status{grid-template-columns:1fr}
-      .grid{grid-template-columns:1fr 1fr}
-    }
-    @media (max-width:680px){
-      .wrap{padding:14px}
-      .hero h1{font-size:32px}
-      .grid,.kpi{grid-template-columns:1fr}
-      .topbar{position:static}
-    }
+    @media (max-width:980px){.hero{grid-template-columns:1fr}.status,.layout{grid-template-columns:1fr}.search-row{grid-template-columns:1fr 1fr}.topbar{position:static}}
+    @media (max-width:680px){.wrap{padding:14px}.hero h1{font-size:32px}.kpi{grid-template-columns:1fr}.search-row{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
@@ -85,20 +77,22 @@
         <img src="/assets/stayhia-icon.jpg" alt="StayHia icon" />
         <span>StayHia</span>
       </div>
-      <nav class="nav">
-        <a class="chip" href="#">Search</a>
-        <a class="chip" href="#">Listing</a>
-        <a class="chip" href="#">Checkout</a>
+      <nav class="nav" aria-label="Product shell routes">
+        <a class="chip route-link active" data-route="search" href="#/search">Search</a>
+        <a class="chip route-link" data-route="listing" href="#/listing">Listing</a>
+        <a class="chip route-link" data-route="checkout" href="#/checkout">Checkout</a>
+        <a class="chip" href="/legal/terms.html">Terms</a>
+        <a class="chip" href="/legal/privacy.html">Privacy</a>
       </nav>
     </header>
 
     <section class="hero">
       <div>
         <h1>Stay Here.<br/>Stay Anywhere.</h1>
-        <p>A premium accommodation marketplace experience is now live. We’ve applied your brand system with cleaner spacing, stronger visuals, and a more modern trust-forward layout.</p>
+        <p>Find beautiful places to stay, book in minutes, and travel with confidence using clear pricing and transparent policies.</p>
         <div class="cta">
-          <a class="btn btn-primary" href="#">Start Exploring</a>
-          <a class="btn btn-secondary" href="https://github.com/akhenkofi/StayHia" target="_blank">View Build Repo</a>
+          <a class="btn btn-primary" href="#/search">Start Exploring</a>
+          <a class="btn btn-secondary" href="#/checkout">Book Your Stay</a>
         </div>
       </div>
       <div class="wordmark-card">
@@ -106,38 +100,297 @@
       </div>
     </section>
 
-    <section class="grid">
-      <article class="card">
-        <h3>Smart Search</h3>
-        <p>Search flow shell is in place and styled for fast mobile use. Next pass connects ranking and filters.</p>
-      </article>
-      <article class="card">
-        <h3>Listing Experience</h3>
-        <p>Listing detail layout is prepared for rich photos, pricing blocks, and trust indicators.</p>
-      </article>
-      <article class="card">
-        <h3>Checkout Clarity</h3>
-        <p>Fee snapshot and policy visibility are emphasized to keep booking trust transparent.</p>
-      </article>
+    <section id="view-search" class="panel view active" aria-labelledby="search-title">
+      <h2 id="search-title">Find your perfect stay</h2>
+      <p class="muted">Search by destination, travel dates, and guest count to discover the best match.</p>
+      <div class="search-row">
+        <input class="input" value="Accra, Ghana" aria-label="Destination" />
+        <input class="input" value="Mar 18 → Mar 22" aria-label="Dates" />
+        <input class="input" value="2 Guests" aria-label="Guests" />
+        <input class="input" value="Entire place" aria-label="Type" />
+        <button id="search-quote-btn" class="btn btn-primary" type="button">Get Live Quote</button>
+      </div>
+      <div class="layout">
+        <article class="card">
+          <h3>Result preview: Harmony Bay Loft</h3>
+          <p class="muted">4.93 ★ • Superhost • Beach access • Free cancellation by Mar 15</p>
+        </article>
+        <article class="card">
+          <span class="pill info">Ranking signal placeholders</span>
+          <p class="muted">Price competitiveness, rating confidence, host response rate, and policy flexibility hooks staged.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="view-listing" class="panel view" aria-labelledby="listing-title">
+      <h2 id="listing-title">Stay details</h2>
+      <p class="muted">Review amenities, host trust profile, and cancellation terms before you book.</p>
+      <div class="layout">
+        <article class="card">
+          <h3>What this place offers</h3>
+          <p class="muted">Ocean view • Dedicated workspace • Fast Wi-Fi • Self check-in • Free parking</p>
+          <div class="line"></div>
+          <h3>Host trust profile</h3>
+          <p class="muted">Hosted by Ama • 5 years hosting • 98% response rate • Identity verified</p>
+        </article>
+        <article class="card">
+          <h3>Cancellation at a glance</h3>
+          <span class="pill ok">Full refund before Mar 15, 11:59 PM</span>
+          <p class="muted" style="margin-top:8px">50% refund Mar 16–17, then non-refundable after check-in.</p>
+          <a href="/legal/cancellation.html">Read full cancellation policy</a>
+          <div class="line"></div>
+          <h3>Live booking state</h3>
+          <p id="booking-state" class="muted">No booking created yet.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="view-checkout" class="panel view" aria-labelledby="checkout-title">
+      <h2 id="checkout-title">Secure checkout</h2>
+      <p class="muted">See a clear breakdown before payment and complete your reservation securely.</p>
+      <div class="layout">
+        <article class="card">
+          <h3>Price details</h3>
+          <div class="price-grid">
+            <span>$132 × 4 nights</span><strong>$528</strong>
+            <span>Cleaning fee</span><strong>$36</strong>
+            <span>Service fee</span><strong>$42</strong>
+            <span>Taxes</span><strong>$29</strong>
+          </div>
+          <div class="line"></div>
+          <div class="price-grid"><strong>Total before pay</strong><strong>$635</strong></div>
+          <div class="line"></div>
+          <p id="quote-status" class="muted">Quote: not created</p>
+          <p id="booking-status" class="muted">Booking: not created</p>
+          <p id="payment-status" class="muted">Payment: not created</p>
+          <input id="checkout-idempotency-key" class="input" style="margin-top:8px" value="demo-key-1" aria-label="Idempotency Key" />
+          <input id="payment-intent-id" class="input" style="margin-top:8px" value="" aria-label="Payment Intent ID" placeholder="Payment Intent ID" />
+          <div class="cta" style="margin-top:10px">
+            <button id="create-quote-btn" class="btn btn-primary" type="button">Create Quote</button>
+            <button id="create-booking-btn" class="btn btn-secondary" type="button">Create Booking</button>
+            <button id="create-payment-intent-btn" class="btn btn-secondary" type="button">Create Payment Intent</button>
+            <button id="capture-payment-btn" class="btn btn-secondary" type="button">Capture Payment</button>
+            <button id="confirm-booking-btn" class="btn btn-secondary" type="button">Confirm</button>
+            <button id="cancel-booking-btn" class="btn btn-secondary" type="button">Cancel</button>
+          </div>
+        </article>
+        <article class="card">
+          <h3>Policy snapshot</h3>
+          <span class="pill warn">Locked at booking confirmation</span>
+          <p class="muted" style="margin-top:8px">Cancellation and refund terms are captured with the quote and preserved with your booking record hash.</p>
+          <a href="/legal/refunds.html">Refund policy details</a>
+        </article>
+      </div>
     </section>
 
     <section class="status">
       <article class="card">
-        <h3>Live Build Status</h3>
-        <p>Domain is connected and serving this new homepage design. API verification is configured and progressing through DNS/runtime finalization.</p>
+        <h3>Why guests book with StayHia</h3>
         <div class="kpi">
-          <div class="box"><b>Live</b><span class="sub">Homepage deployed</span></div>
-          <div class="box"><b>Brand</b><span class="sub">Logo system applied</span></div>
-          <div class="box"><b>Next</b><span class="sub">Full funnel wiring</span></div>
+          <div class="box"><b>Trusted stays</b><span class="sub">Verified host profiles</span></div>
+          <div class="box"><b>Transparent pricing</b><span class="sub">No hidden fees at checkout</span></div>
+          <div class="box"><b>Flexible policies</b><span class="sub">Clear cancellation terms</span></div>
         </div>
       </article>
       <article class="card">
-        <h3>Identity Rules</h3>
-        <p>✅ Icon-only logo for app icon/favicon/header mark<br/>✅ Full wordmark on homepage and primary branding surfaces</p>
+        <h3>Book with confidence</h3>
+        <p>Support is available throughout your booking journey, from search to check-in.</p>
       </article>
     </section>
 
-    <p class="footer">StayHia • Premium booking experience in active build sprint</p>
+    <p class="footer">StayHia • Premium booking experience • <a href="/legal/terms.html">Terms</a> • <a href="/legal/privacy.html">Privacy</a> • <a href="/legal/cancellation.html">Cancellation</a> • <a href="/legal/refunds.html">Refunds</a> • <a href="/legal/trust-standards.html">Trust Standards</a></p>
   </div>
+
+  <script>
+    const routeLinks = [...document.querySelectorAll('.route-link')];
+    const views = {
+      search: document.getElementById('view-search'),
+      listing: document.getElementById('view-listing'),
+      checkout: document.getElementById('view-checkout')
+    };
+
+    const API_BASE = `${location.protocol}//api.stayhia.com`;
+    const quoteStatusEl = document.getElementById('quote-status');
+    const bookingStatusEl = document.getElementById('booking-status');
+    const paymentStatusEl = document.getElementById('payment-status');
+    const bookingStateEl = document.getElementById('booking-state');
+    const idempotencyKeyInput = document.getElementById('checkout-idempotency-key');
+    const paymentIntentInput = document.getElementById('payment-intent-id');
+
+    let currentQuote = null;
+    let currentBooking = null;
+    let currentPaymentIntent = null;
+
+    function getRoute() {
+      const raw = (location.hash || '#/search').replace('#/', '').trim().toLowerCase();
+      return views[raw] ? raw : 'search';
+    }
+
+    function renderRoute() {
+      const route = getRoute();
+      Object.entries(views).forEach(([name, el]) => el.classList.toggle('active', name === route));
+      routeLinks.forEach(link => link.classList.toggle('active', link.dataset.route === route));
+      document.title = `StayHia • ${route.charAt(0).toUpperCase() + route.slice(1)}`;
+    }
+
+    function setQuoteStatus(text) {
+      quoteStatusEl.textContent = `Quote: ${text}`;
+    }
+
+    function setBookingStatus(text) {
+      bookingStatusEl.textContent = `Booking: ${text}`;
+    }
+
+    function setPaymentStatus(text) {
+      paymentStatusEl.textContent = `Payment: ${text}`;
+    }
+
+    function syncBookingState(booking) {
+      if (!booking) {
+        bookingStateEl.textContent = 'No booking created yet.';
+        return;
+      }
+      const latestEvent = booking.events?.[booking.events.length - 1]?.type || 'BOOKING_CREATED';
+      bookingStateEl.textContent = `${booking.state} (${latestEvent}) • ${booking.bookingId}`;
+    }
+
+    async function api(path, method = 'GET', body) {
+      const res = await fetch(`${API_BASE}${path}`, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: body ? JSON.stringify(body) : undefined
+      });
+      const payload = await res.json();
+      if (!res.ok) throw new Error(payload.error || payload.message || 'Request failed');
+      return payload;
+    }
+
+    async function createQuote() {
+      try {
+        setQuoteStatus('creating…');
+        const quote = await api('/v1/quotes', 'POST', {
+          listingId: 'listing_harmony_bay_loft',
+          hostId: 'host_ama',
+          guestId: 'guest_demo',
+          checkIn: '2026-03-18',
+          checkOut: '2026-03-22',
+          guests: 2,
+          fees: {
+            nightlyTotal: 528,
+            cleaningFee: 36,
+            serviceFee: 42,
+            taxes: 29,
+            discount: 0,
+            currency: 'USD'
+          }
+        });
+
+        currentQuote = quote;
+        setQuoteStatus(`${quote.quoteId} • expires ${new Date(quote.expiresAtMs).toLocaleTimeString()}`);
+        location.hash = '#/checkout';
+        renderRoute();
+      } catch (err) {
+        setQuoteStatus(`error: ${err.message}`);
+      }
+    }
+
+    async function createBooking() {
+      if (!currentQuote?.quoteId) {
+        setBookingStatus('create a quote first');
+        return;
+      }
+
+      try {
+        setBookingStatus('creating…');
+        const booking = await api('/v1/bookings', 'POST', {
+          quoteId: currentQuote.quoteId,
+          policy: {
+            cancellationPolicyId: 'flexible_v1',
+            houseRulesVersion: 'default_v1',
+            refundTermsVersion: 'refund_v1'
+          }
+        });
+
+        currentBooking = booking;
+        setBookingStatus(`${booking.bookingId} • ${booking.state}`);
+        syncBookingState(booking);
+      } catch (err) {
+        setBookingStatus(`error: ${err.message}`);
+      }
+    }
+
+    async function createPaymentIntent() {
+      if (!currentBooking?.bookingId) {
+        setPaymentStatus('create a booking first');
+        return;
+      }
+
+      try {
+        const idempotencyKey = `${idempotencyKeyInput.value || 'demo-key'}-intent`;
+        setPaymentStatus('creating intent…');
+        const intent = await api('/v1/payments/intents', 'POST', {
+          bookingId: currentBooking.bookingId,
+          amount: currentBooking.feeBreakdown?.total || 0,
+          currency: 'USD',
+          idempotencyKey
+        });
+
+        currentPaymentIntent = intent;
+        paymentIntentInput.value = intent.paymentIntentId;
+        setPaymentStatus(`${intent.paymentIntentId} • ${intent.status}${intent.idempotentReplay ? ' (replay)' : ''}`);
+      } catch (err) {
+        setPaymentStatus(`error: ${err.message}`);
+      }
+    }
+
+    async function capturePayment() {
+      const paymentIntentId = paymentIntentInput.value || currentPaymentIntent?.paymentIntentId;
+      if (!paymentIntentId) {
+        setPaymentStatus('create payment intent first');
+        return;
+      }
+
+      try {
+        const idempotencyKey = `${idempotencyKeyInput.value || 'demo-key'}-capture`;
+        setPaymentStatus('capturing…');
+        const intent = await api(`/v1/payments/intents/${paymentIntentId}/confirm`, 'POST', { idempotencyKey });
+        currentPaymentIntent = intent;
+        paymentIntentInput.value = intent.paymentIntentId;
+        setPaymentStatus(`${intent.paymentIntentId} • ${intent.status}${intent.idempotentReplay ? ' (replay)' : ''}`);
+      } catch (err) {
+        setPaymentStatus(`error: ${err.message}`);
+      }
+    }
+
+    async function mutateBooking(actionPath, body = undefined) {
+      if (!currentBooking?.bookingId) {
+        setBookingStatus('create a booking first');
+        return;
+      }
+
+      try {
+        const booking = await api(`/v1/bookings/${currentBooking.bookingId}/${actionPath}`, 'POST', body);
+        currentBooking = booking;
+        setBookingStatus(`${booking.bookingId} • ${booking.state}${booking.idempotentReplay ? ' (replay)' : ''}`);
+        syncBookingState(booking);
+      } catch (err) {
+        setBookingStatus(`error: ${err.message}`);
+      }
+    }
+
+    document.getElementById('search-quote-btn')?.addEventListener('click', createQuote);
+    document.getElementById('create-quote-btn')?.addEventListener('click', createQuote);
+    document.getElementById('create-booking-btn')?.addEventListener('click', createBooking);
+    document.getElementById('create-payment-intent-btn')?.addEventListener('click', createPaymentIntent);
+    document.getElementById('capture-payment-btn')?.addEventListener('click', capturePayment);
+    document.getElementById('confirm-booking-btn')?.addEventListener('click', () => mutateBooking('confirm', {
+      paymentIntentId: paymentIntentInput.value,
+      idempotencyKey: `${idempotencyKeyInput.value || 'demo-key'}-confirm`
+    }));
+    document.getElementById('cancel-booking-btn')?.addEventListener('click', () => mutateBooking('cancel'));
+
+    window.addEventListener('hashchange', renderRoute);
+    renderRoute();
+  </script>
 </body>
 </html>
