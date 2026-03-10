@@ -546,7 +546,17 @@
     function getRoute() {
       const routeChunk = (location.hash || '#/search').replace('#/', '').split('?')[0];
       const raw = String(routeChunk || 'search').trim().toLowerCase();
-      return views[raw] ? raw : 'search';
+      const root = raw.split('/')[0];
+      return views[root] ? root : 'search';
+    }
+
+    function getTravelerPaneFromHash() {
+      const routeChunk = (location.hash || '#/search').replace('#/', '').split('?')[0];
+      const raw = String(routeChunk || 'search').trim().toLowerCase();
+      const segs = raw.split('/');
+      if (segs[0] !== 'search') return 'explore';
+      const pane = segs[1] || 'explore';
+      return ['explore','wishlists','trips','messages','profile'].includes(pane) ? pane : 'explore';
     }
 
     function applyMode() {
@@ -558,15 +568,24 @@
       }
     }
 
-    function setTravelerPane(name) {
-      travelerPanes.forEach(p => p.classList.toggle('active', p.dataset.pane === name));
-      travelerTabBtns.forEach(b => b.classList.toggle('active', b.dataset.travelerPane === name));
+    function setTravelerPane(name, updateHash = false) {
+      const pane = ['explore','wishlists','trips','messages','profile'].includes(name) ? name : 'explore';
+      travelerPanes.forEach(p => p.classList.toggle('active', p.dataset.pane === pane));
+      travelerTabBtns.forEach(b => b.classList.toggle('active', b.dataset.travelerPane === pane));
+      if (updateHash) {
+        const query = location.hash.includes('?') ? location.hash.slice(location.hash.indexOf('?')) : '';
+        const next = `#/search/${pane}${query}`;
+        if (location.hash !== next) location.hash = next;
+      }
     }
 
     function renderRoute() {
       const route = getRoute();
       Object.entries(views).forEach(([name, el]) => el.classList.toggle('active', name === route));
       routeLinks.forEach(link => link.classList.toggle('active', link.dataset.route === route));
+      if (route === 'search') {
+        setTravelerPane(getTravelerPaneFromHash(), false);
+      }
       document.title = `StayHia • ${route.charAt(0).toUpperCase() + route.slice(1)}`;
     }
 
@@ -1074,7 +1093,7 @@
       renderRoute();
     });
 
-    travelerTabBtns.forEach(btn => btn.addEventListener('click', () => setTravelerPane(btn.dataset.travelerPane || 'explore')));
+    travelerTabBtns.forEach(btn => btn.addEventListener('click', () => setTravelerPane(btn.dataset.travelerPane || 'explore', true)));
 
     [searchDestinationInput, searchDatesInput, searchGuestsInput, searchTypeInput].forEach((input) => {
       input?.addEventListener('change', () => {
@@ -1134,7 +1153,7 @@
       }
     });
     applyMode();
-    setTravelerPane('explore');
+    setTravelerPane(getTravelerPaneFromHash(), false);
     applySearchFiltersToInputs(readSearchFiltersFromHash());
     persistSearchFiltersToHash();
     renderListings();
