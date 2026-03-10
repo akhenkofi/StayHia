@@ -1,0 +1,20 @@
+{
+  "name": "StayHia",
+  "short_name": "StayHia",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#111d46",
+  "icons": [
+    {
+      "src": "/assets/stayhia-icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}
