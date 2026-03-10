@@ -79,6 +79,12 @@
     .resv-card{background:#fff;border:1px solid #eceef4;border-radius:14px;padding:12px;margin-bottom:10px}
     .resv-time{font-size:12px;color:#6b7280;font-weight:700}
     .resv-title{font-size:28px;line-height:1.05;margin:8px 0 14px}
+    .host-pane{display:none}
+    .host-pane.active{display:block}
+    .host-bottom-nav{position:sticky;bottom:0;background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px;display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:12px}
+    .host-nav-btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 6px;font-weight:700;font-size:12px}
+    .host-nav-btn.active{background:#111d46;color:#fff;border-color:#111d46}
+    .unit-editor{margin-top:12px}
 
     @media (max-width:980px){.hero{grid-template-columns:1fr}.status,.layout{grid-template-columns:1fr}.search-row{grid-template-columns:1fr 1fr}.topbar{position:static}}
     @media (max-width:680px){.wrap{padding:14px}.hero h1{font-size:32px}.kpi{grid-template-columns:1fr}.search-row{grid-template-columns:1fr}}
@@ -199,75 +205,114 @@
     </section>
 
     <section id="view-host" class="panel view" aria-labelledby="host-title">
-      <h2 id="host-title">Host earnings dashboard</h2>
-      <p class="muted">Monitor payout pipeline, release timing, and reconciliation activity in one place.</p>
-      <div class="resv-wrap">
-        <div class="resv-head">
-          <button class="resv-tab active" type="button">Today</button>
-          <button class="resv-tab" type="button">Upcoming</button>
-        </div>
-        <h3 class="resv-title">You have 7 reservations</h3>
-        <div class="resv-card">
-          <div class="resv-time">2:00 PM</div>
-          <h3>Enoch checks in</h3>
-          <p class="muted">Relaxed Modern Studio • Gated • Wi‑Fi • Spintex</p>
-        </div>
-        <div class="resv-card">
-          <div class="resv-time">3:00 PM</div>
-          <h3>NaTasha checks in</h3>
-          <p class="muted">Luxury Penthouse • Gated • 15 min Airport Spintex</p>
-        </div>
-        <div class="resv-card">
-          <div class="resv-time">All day</div>
-          <h3>Dominick’s group of 2 stays one more day</h3>
-          <p class="muted">Stylish 1BR Apartment • 15 min Airport • Wi‑Fi Luxe</p>
+      <h2 id="host-title">Host</h2>
+      <div class="host-pane active" data-host-pane="today">
+        <div class="resv-wrap">
+          <div class="resv-head">
+            <button class="resv-tab active" type="button">Today</button>
+            <button class="resv-tab" type="button">Upcoming</button>
+          </div>
+          <h3 class="resv-title">You have 7 reservations</h3>
+          <div class="resv-card"><div class="resv-time">2:00 PM</div><h3>Enoch checks in</h3><p class="muted">Relaxed Modern Studio • Gated • Wi‑Fi • Spintex</p></div>
+          <div class="resv-card"><div class="resv-time">3:00 PM</div><h3>NaTasha checks in</h3><p class="muted">Luxury Penthouse • Gated • 15 min Airport Spintex</p></div>
+          <div class="resv-card"><div class="resv-time">All day</div><h3>Dominick’s group of 2 stays one more day</h3><p class="muted">Stylish 1BR Apartment • 15 min Airport • Wi‑Fi Luxe</p></div>
         </div>
       </div>
-      <div class="layout">
-        <article class="card">
-          <h3>Payout controls</h3>
-          <input id="host-id-input" class="input" value="host_ama" aria-label="Host ID" placeholder="Host ID" />
-          <div class="search-row" style="grid-template-columns:1fr 1fr auto;margin-top:10px">
-            <select id="payout-status-filter" class="input" aria-label="Payout status filter">
-              <option value="">All statuses</option>
-              <option value="PENDING_RELEASE">Pending release</option>
-              <option value="RELEASED">Released</option>
-            </select>
-            <input id="payout-limit-input" class="input" value="50" aria-label="Payout limit" />
-            <button id="refresh-payouts-btn" class="btn btn-primary" type="button">Refresh payouts</button>
-          </div>
+
+      <div class="host-pane" data-host-pane="calendar">
+        <div class="card">
+          <h3>Calendar</h3>
+          <p class="muted">Tap a unit to block/open dates and edit nightly price.</p>
+          <div class="listing-grid" id="host-calendar-units"></div>
+        </div>
+      </div>
+
+      <div class="host-pane" data-host-pane="listings">
+        <div class="card">
+          <h3>Listings</h3>
+          <div class="listing-grid" id="host-listings-grid"></div>
+        </div>
+      </div>
+
+      <div class="host-pane" data-host-pane="messages">
+        <div class="card">
+          <h3>Messages</h3>
+          <p class="muted">Inbox style host threads</p>
+          <div class="resv-card"><h3>Guest: Daniel</h3><p class="muted">Can I check in 1 hour early?</p></div>
+          <div class="resv-card"><h3>Guest: Ama</h3><p class="muted">Do you provide airport pickup?</p></div>
+          <div class="resv-card"><h3>Guest: Kojo</h3><p class="muted">Is Wi‑Fi stable for remote work?</p></div>
+        </div>
+      </div>
+
+      <div class="host-pane" data-host-pane="menu">
+        <div class="layout">
+          <article class="card">
+            <h3>Payout controls</h3>
+            <input id="host-id-input" class="input" value="host_ama" aria-label="Host ID" placeholder="Host ID" />
+            <div class="search-row" style="grid-template-columns:1fr 1fr auto;margin-top:10px">
+              <select id="payout-status-filter" class="input" aria-label="Payout status filter">
+                <option value="">All statuses</option>
+                <option value="PENDING_RELEASE">Pending release</option>
+                <option value="RELEASED">Released</option>
+              </select>
+              <input id="payout-limit-input" class="input" value="50" aria-label="Payout limit" />
+              <button id="refresh-payouts-btn" class="btn btn-primary" type="button">Refresh payouts</button>
+            </div>
+            <div class="cta" style="margin-top:10px">
+              <button id="run-reconcile-btn" class="btn btn-secondary" type="button">Run Reconciliation</button>
+              <button id="refresh-reconcile-events-btn" class="btn btn-secondary" type="button">Load Reconcile Timeline</button>
+            </div>
+            <div class="line"></div>
+            <h3>Pricing controls</h3>
+            <div class="search-row" style="grid-template-columns:1fr 1fr auto">
+              <select id="host-pricing-mode" class="input" aria-label="Host pricing mode">
+                <option value="smart">Smart pricing</option>
+                <option value="manual">Manual price</option>
+              </select>
+              <input id="host-manual-nightly" class="input" value="132" aria-label="Manual nightly price" placeholder="Nightly price (USD)" />
+              <button id="apply-host-pricing-btn" class="btn btn-primary" type="button">Apply</button>
+            </div>
+            <p id="host-pricing-status" class="muted" style="margin-top:8px">Pricing mode: smart.</p>
+            <p id="host-dashboard-status" class="muted" style="margin-top:10px">Host dashboard idle.</p>
+          </article>
+          <article class="card">
+            <h3>Earnings summary</h3>
+            <div class="kpi" style="margin-top:0">
+              <div class="box"><span class="sub">Total payouts</span><b id="host-total-payouts">0</b></div>
+              <div class="box"><span class="sub">Pending amount</span><b id="host-pending-amount">$0</b></div>
+              <div class="box"><span class="sub">Released amount</span><b id="host-released-amount">$0</b></div>
+            </div>
+            <div class="line"></div>
+            <h3 style="margin-top:0">Payout timeline</h3>
+            <p id="host-payout-list" class="muted">No payout rows loaded.</p>
+            <div class="line"></div>
+            <h3 style="margin-top:0">Reconciliation feed</h3>
+            <p id="host-reconcile-list" class="muted">No reconciliation events loaded.</p>
+          </article>
+        </div>
+      </div>
+
+      <div class="host-bottom-nav">
+        <button class="host-nav-btn active" data-host-target="today">Today</button>
+        <button class="host-nav-btn" data-host-target="calendar">Calendar</button>
+        <button class="host-nav-btn" data-host-target="listings">Listings</button>
+        <button class="host-nav-btn" data-host-target="messages">Messages</button>
+        <button class="host-nav-btn" data-host-target="menu">Menu</button>
+      </div>
+
+      <div id="unit-editor" class="unit-editor" style="display:none">
+        <div class="card">
+          <h3 id="unit-editor-title">Unit calendar</h3>
+          <p class="muted">Block/open selected dates and edit nightly price.</p>
+          <input id="unit-price-input" class="input" value="120" placeholder="Nightly price (USD)" />
           <div class="cta" style="margin-top:10px">
-            <button id="run-reconcile-btn" class="btn btn-secondary" type="button">Run Reconciliation</button>
-            <button id="refresh-reconcile-events-btn" class="btn btn-secondary" type="button">Load Reconcile Timeline</button>
+            <button id="unit-block-btn" class="btn btn-secondary" type="button">Block dates</button>
+            <button id="unit-open-btn" class="btn btn-secondary" type="button">Open dates</button>
+            <button id="unit-save-price-btn" class="btn btn-primary" type="button">Save price</button>
+            <button id="unit-close-btn" class="btn" type="button">Close</button>
           </div>
-          <div class="line"></div>
-          <h3>Pricing controls</h3>
-          <p class="muted">Choose manual host price or smart pricing (demand/time adjusted).</p>
-          <div class="search-row" style="grid-template-columns:1fr 1fr auto">
-            <select id="host-pricing-mode" class="input" aria-label="Host pricing mode">
-              <option value="smart">Smart pricing</option>
-              <option value="manual">Manual price</option>
-            </select>
-            <input id="host-manual-nightly" class="input" value="132" aria-label="Manual nightly price" placeholder="Nightly price (USD)" />
-            <button id="apply-host-pricing-btn" class="btn btn-primary" type="button">Apply</button>
-          </div>
-          <p id="host-pricing-status" class="muted" style="margin-top:8px">Pricing mode: smart.</p>
-          <p id="host-dashboard-status" class="muted" style="margin-top:10px">Host dashboard idle.</p>
-        </article>
-        <article class="card">
-          <h3>Earnings summary</h3>
-          <div class="kpi" style="margin-top:0">
-            <div class="box"><span class="sub">Total payouts</span><b id="host-total-payouts">0</b></div>
-            <div class="box"><span class="sub">Pending amount</span><b id="host-pending-amount">$0</b></div>
-            <div class="box"><span class="sub">Released amount</span><b id="host-released-amount">$0</b></div>
-          </div>
-          <div class="line"></div>
-          <h3 style="margin-top:0">Payout timeline</h3>
-          <p id="host-payout-list" class="muted">No payout rows loaded.</p>
-          <div class="line"></div>
-          <h3 style="margin-top:0">Reconciliation feed</h3>
-          <p id="host-reconcile-list" class="muted">No reconciliation events loaded.</p>
-        </article>
+          <p id="unit-editor-status" class="muted" style="margin-top:8px">Ready.</p>
+        </div>
       </div>
     </section>
 
@@ -343,6 +388,14 @@
     const hostReleasedAmountEl = document.getElementById('host-released-amount');
     const hostPayoutListEl = document.getElementById('host-payout-list');
     const hostReconcileListEl = document.getElementById('host-reconcile-list');
+    const hostCalendarUnitsEl = document.getElementById('host-calendar-units');
+    const hostListingsGridEl = document.getElementById('host-listings-grid');
+    const hostPaneEls = [...document.querySelectorAll('.host-pane')];
+    const hostNavBtns = [...document.querySelectorAll('.host-nav-btn')];
+    const unitEditorEl = document.getElementById('unit-editor');
+    const unitEditorTitleEl = document.getElementById('unit-editor-title');
+    const unitPriceInput = document.getElementById('unit-price-input');
+    const unitEditorStatusEl = document.getElementById('unit-editor-status');
 
     let currentQuote = null;
     let currentBooking = null;
@@ -418,6 +471,39 @@
       listingAmenitiesEl.textContent = selectedListing.amenities;
       listingHostEl.textContent = `Hosted by ${selectedListing.host} • ${selectedListing.rating} ★ • Identity verified`;
       refreshHostPricingPanel();
+    }
+
+    function renderHostShellLists() {
+      if (hostCalendarUnitsEl) {
+        hostCalendarUnitsEl.innerHTML = '';
+        ghanaListings.slice(0, 8).forEach((l) => {
+          const card = document.createElement('div');
+          card.className = 'listing-card';
+          card.innerHTML = `<img src="${l.image}" alt="${l.name}" /><div class="listing-body"><p class="listing-title">${l.name}</p><p class="listing-meta">Tap to edit calendar & price</p></div>`;
+          card.onclick = () => {
+            unitEditorEl.style.display = 'block';
+            unitEditorTitleEl.textContent = `${l.name} calendar`;
+            unitPriceInput.value = String(getEffectiveNightly(l));
+            unitEditorStatusEl.textContent = 'Ready.';
+          };
+          hostCalendarUnitsEl.appendChild(card);
+        });
+      }
+      if (hostListingsGridEl) {
+        hostListingsGridEl.innerHTML = '';
+        ghanaListings.forEach((l) => {
+          const card = document.createElement('div');
+          card.className = 'listing-card';
+          const nightly = getEffectiveNightly(l);
+          card.innerHTML = `<img src="${l.image}" alt="${l.name}" /><div class="listing-body"><p class="listing-title">${l.name}</p><p class="listing-meta">${l.area}</p><p class="listing-meta">Listed • $${nightly}/night</p></div>`;
+          hostListingsGridEl.appendChild(card);
+        });
+      }
+    }
+
+    function setHostPane(name) {
+      hostPaneEls.forEach(el => el.classList.toggle('active', el.dataset.hostPane === name));
+      hostNavBtns.forEach(btn => btn.classList.toggle('active', btn.dataset.hostTarget === name));
     }
 
     function setQuoteStatus(text) {
@@ -668,6 +754,11 @@
     }));
     document.getElementById('cancel-booking-btn')?.addEventListener('click', () => mutateBooking('cancel'));
     document.getElementById('refresh-payouts-btn')?.addEventListener('click', refreshHostPayouts);
+    hostNavBtns.forEach(btn => btn.addEventListener('click', () => setHostPane(btn.dataset.hostTarget || 'today')));
+    document.getElementById('unit-block-btn')?.addEventListener('click', () => { unitEditorStatusEl.textContent = 'Selected dates blocked.'; });
+    document.getElementById('unit-open-btn')?.addEventListener('click', () => { unitEditorStatusEl.textContent = 'Selected dates opened.'; });
+    document.getElementById('unit-save-price-btn')?.addEventListener('click', () => { unitEditorStatusEl.textContent = `Nightly price updated to $${Number(unitPriceInput.value || 0)}.`; renderListings(); renderHostShellLists(); });
+    document.getElementById('unit-close-btn')?.addEventListener('click', () => { unitEditorEl.style.display = 'none'; });
     applyHostPricingBtn?.addEventListener('click', () => {
       const mode = hostPricingModeInput.value === 'manual' ? 'manual' : 'smart';
       const manualNightly = Math.max(1, Number(hostManualNightlyInput.value || selectedListing.nightly));
@@ -681,13 +772,17 @@
     window.addEventListener('hashchange', () => {
       renderRoute();
       if (getRoute() === 'host') {
+        setHostPane('today');
+        renderHostShellLists();
         refreshHostPayouts();
         refreshReconciliationEvents();
       }
     });
     renderListings();
+    renderHostShellLists();
     renderRoute();
     if (getRoute() === 'host') {
+      setHostPane('today');
       refreshHostPayouts();
       refreshReconciliationEvents();
     }
