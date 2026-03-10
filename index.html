@@ -94,7 +94,8 @@
     .mode-switch{border:1px solid var(--line);background:#111d46;color:#fff;border-radius:999px;padding:8px 12px;font-weight:700;cursor:pointer}
     .traveler-shell{margin-top:14px}
     .traveler-tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:10px;z-index:85;max-width:1140px;width:calc(100% - 28px);display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:12px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px;box-shadow:var(--shadow)}
-    .traveler-tab{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 6px;font-weight:700;font-size:12px;cursor:pointer}
+    .traveler-tab{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 6px;font-weight:700;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;line-height:1.05}
+    .tab-icon{font-size:15px}
     .traveler-tab.active{border-color:#ff5f75;color:#ff5f75}
     .traveler-pane{display:none}
     .traveler-pane.active{display:block}
@@ -154,11 +155,11 @@
 
       <div class="traveler-shell">
         <div class="traveler-tabs">
-          <button class="traveler-tab active" data-traveler-pane="explore" type="button">Explore</button>
-          <button class="traveler-tab" data-traveler-pane="wishlists" type="button">Wishlists</button>
-          <button class="traveler-tab" data-traveler-pane="trips" type="button">Trips</button>
-          <button class="traveler-tab" data-traveler-pane="messages" type="button">Messages</button>
-          <button class="traveler-tab" data-traveler-pane="profile" type="button">Profile</button>
+          <button class="traveler-tab active" data-traveler-pane="explore" type="button"><span class="tab-icon">🔎</span><span>Explore</span></button>
+          <button class="traveler-tab" data-traveler-pane="wishlists" type="button"><span class="tab-icon">❤️</span><span>Wishlists</span></button>
+          <button class="traveler-tab" data-traveler-pane="trips" type="button"><span class="tab-icon">🧳</span><span>Trips</span></button>
+          <button class="traveler-tab" data-traveler-pane="messages" type="button"><span class="tab-icon">💬</span><span>Messages</span></button>
+          <button class="traveler-tab" data-traveler-pane="profile" type="button"><span class="tab-icon">👤</span><span>Profile</span></button>
         </div>
         <div class="traveler-pane active" data-pane="explore">
           <div class="card"><h3>Continue searching in Accra</h3><p class="muted">Homes • Experiences • Services</p></div>
