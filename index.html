@@ -102,12 +102,35 @@
     .traveler-pane.active{display:block}
     #view-search{padding-bottom:92px}
     .mode-fab{position:fixed;right:14px;bottom:84px;z-index:95;border:0;border-radius:999px;background:#111;color:#fff;padding:12px 18px;font-weight:800;box-shadow:0 10px 24px rgba(0,0,0,.24);cursor:pointer}
+    .app-splash{position:fixed;inset:0;background:#fff;z-index:200;display:grid;place-items:center;transition:opacity .35s ease}
+    .app-splash.hidden{opacity:0;pointer-events:none}
+    .app-splash .inner{text-align:center}
+    .app-splash img{width:88px;height:88px;border-radius:20px;object-fit:cover;box-shadow:var(--shadow)}
+    .app-splash p{margin-top:10px;color:#334155;font-weight:700}
+    .offline-overlay{position:fixed;inset:0;background:rgba(255,255,255,.96);z-index:190;display:none;place-items:center;padding:18px;text-align:center}
+    .offline-overlay.show{display:grid}
+    .offline-overlay img{width:74px;height:74px;border-radius:16px;object-fit:cover;margin-bottom:10px}
 
     @media (max-width:980px){.hero{grid-template-columns:1fr}.status,.layout{grid-template-columns:1fr}.search-row{grid-template-columns:1fr 1fr}.topbar{position:static}}
     @media (max-width:680px){.wrap{padding:14px}.hero h1{font-size:32px}.kpi{grid-template-columns:1fr}.search-row{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
+  <div id="app-splash" class="app-splash">
+    <div class="inner">
+      <img src="/assets/stayhia-icon.png" alt="StayHia" />
+      <p>StayHia is loading…</p>
+    </div>
+  </div>
+
+  <div id="offline-overlay" class="offline-overlay">
+    <div>
+      <img src="/assets/stayhia-icon.png" alt="StayHia" />
+      <h3>No internet connection</h3>
+      <p class="muted">Please check your network and try again.</p>
+    </div>
+  </div>
+
   <div class="wrap">
     <header class="topbar">
       <div class="brand">
@@ -241,6 +264,26 @@
           <span class="pill warn">Locked at booking confirmation</span>
           <p class="muted" style="margin-top:8px">Cancellation and refund terms are captured with the quote and preserved with your booking record hash.</p>
           <a href="/legal/refunds.html">Refund policy details</a>
+        </article>
+        <article class="card">
+          <h3>Notification settings</h3>
+          <p class="muted">Control how booking updates are delivered before and after confirmation.</p>
+          <input id="notification-user-id" class="input" value="guest_demo" aria-label="Notification User ID" placeholder="User ID" />
+          <div class="line"></div>
+          <label><input id="notif-channel-in-app" type="checkbox" checked /> In-app alerts</label><br />
+          <label><input id="notif-channel-email" type="checkbox" checked /> Email updates</label><br />
+          <label><input id="notif-channel-sms" type="checkbox" /> SMS alerts</label><br />
+          <label><input id="notif-channel-push" type="checkbox" checked /> Push notifications</label>
+          <div class="line"></div>
+          <label><input id="notif-event-created" type="checkbox" checked /> Booking created</label><br />
+          <label><input id="notif-event-confirmed" type="checkbox" checked /> Booking confirmed</label><br />
+          <label><input id="notif-event-cancelled" type="checkbox" checked /> Booking cancelled</label><br />
+          <label><input id="notif-quiet-critical-only" type="checkbox" checked /> Quiet hours: only critical</label>
+          <div class="cta" style="margin-top:10px">
+            <button id="load-notification-prefs-btn" class="btn btn-secondary" type="button">Load settings</button>
+            <button id="save-notification-prefs-btn" class="btn btn-primary" type="button">Save settings</button>
+          </div>
+          <p id="notification-prefs-status" class="muted" style="margin-top:8px">Notification settings idle.</p>
         </article>
       </div>
     </section>
@@ -378,6 +421,8 @@
   <button id="mode-fab" class="mode-fab" type="button">Switch to hosting</button>
 
   <script>
+    const appSplashEl = document.getElementById('app-splash');
+    const offlineOverlayEl = document.getElementById('offline-overlay');
     const routeLinks = [...document.querySelectorAll('.route-link')];
     const modeFab = document.getElementById('mode-fab');
     const hostRouteLink = document.getElementById('host-route-link');
@@ -450,6 +495,16 @@
     const unitEditorTitleEl = document.getElementById('unit-editor-title');
     const unitPriceInput = document.getElementById('unit-price-input');
     const unitEditorStatusEl = document.getElementById('unit-editor-status');
+    const notificationUserIdInput = document.getElementById('notification-user-id');
+    const notifChannelInAppInput = document.getElementById('notif-channel-in-app');
+    const notifChannelEmailInput = document.getElementById('notif-channel-email');
+    const notifChannelSmsInput = document.getElementById('notif-channel-sms');
+    const notifChannelPushInput = document.getElementById('notif-channel-push');
+    const notifEventCreatedInput = document.getElementById('notif-event-created');
+    const notifEventConfirmedInput = document.getElementById('notif-event-confirmed');
+    const notifEventCancelledInput = document.getElementById('notif-event-cancelled');
+    const notifQuietCriticalOnlyInput = document.getElementById('notif-quiet-critical-only');
+    const notificationPrefsStatusEl = document.getElementById('notification-prefs-status');
 
     let currentQuote = null;
     let currentBooking = null;
@@ -603,6 +658,73 @@
 
     function setPaymentStatus(text) {
       paymentStatusEl.textContent = `Payment: ${text}`;
+    }
+
+    function setNotificationPrefsStatus(text) {
+      notificationPrefsStatusEl.textContent = text;
+    }
+
+    function collectNotificationPreferencesPayload() {
+      return {
+        channels: {
+          in_app: Boolean(notifChannelInAppInput.checked),
+          email: Boolean(notifChannelEmailInput.checked),
+          sms: Boolean(notifChannelSmsInput.checked),
+          push: Boolean(notifChannelPushInput.checked)
+        },
+        bookingEvents: {
+          BOOKING_CREATED: Boolean(notifEventCreatedInput.checked),
+          BOOKING_CONFIRMED: Boolean(notifEventConfirmedInput.checked),
+          BOOKING_CANCELLED: Boolean(notifEventCancelledInput.checked)
+        },
+        quietHoursOverrideCriticalOnly: Boolean(notifQuietCriticalOnlyInput.checked)
+      };
+    }
+
+    function applyNotificationPreferences(prefs) {
+      notifChannelInAppInput.checked = Boolean(prefs.channels?.in_app);
+      notifChannelEmailInput.checked = Boolean(prefs.channels?.email);
+      notifChannelSmsInput.checked = Boolean(prefs.channels?.sms);
+      notifChannelPushInput.checked = Boolean(prefs.channels?.push);
+      notifEventCreatedInput.checked = prefs.bookingEvents?.BOOKING_CREATED !== false;
+      notifEventConfirmedInput.checked = prefs.bookingEvents?.BOOKING_CONFIRMED !== false;
+      notifEventCancelledInput.checked = prefs.bookingEvents?.BOOKING_CANCELLED !== false;
+      notifQuietCriticalOnlyInput.checked = prefs.quietHoursOverrideCriticalOnly !== false;
+    }
+
+    async function loadNotificationPreferences() {
+      try {
+        const userId = (notificationUserIdInput.value || '').trim();
+        if (!userId) {
+          setNotificationPrefsStatus('Notification user ID required.');
+          return;
+        }
+
+        setNotificationPrefsStatus('Loading settings…');
+        const prefs = await api(`/v1/notification-preferences/${encodeURIComponent(userId)}`);
+        applyNotificationPreferences(prefs);
+        setNotificationPrefsStatus(`Loaded settings for ${prefs.userId}.`);
+      } catch (err) {
+        setNotificationPrefsStatus(`Settings load failed: ${err.message}`);
+      }
+    }
+
+    async function saveNotificationPreferences() {
+      try {
+        const userId = (notificationUserIdInput.value || '').trim();
+        if (!userId) {
+          setNotificationPrefsStatus('Notification user ID required.');
+          return;
+        }
+
+        setNotificationPrefsStatus('Saving settings…');
+        const payload = collectNotificationPreferencesPayload();
+        const prefs = await api(`/v1/notification-preferences/${encodeURIComponent(userId)}`, 'PUT', payload);
+        applyNotificationPreferences(prefs);
+        setNotificationPrefsStatus(`Saved settings for ${prefs.userId} (${new Date(prefs.updatedAt).toLocaleString()}).`);
+      } catch (err) {
+        setNotificationPrefsStatus(`Settings save failed: ${err.message}`);
+      }
     }
 
     function syncBookingState(booking) {
@@ -874,6 +996,15 @@
     });
     document.getElementById('run-reconcile-btn')?.addEventListener('click', runPayoutReconciliation);
     document.getElementById('refresh-reconcile-events-btn')?.addEventListener('click', refreshReconciliationEvents);
+    document.getElementById('load-notification-prefs-btn')?.addEventListener('click', loadNotificationPreferences);
+    document.getElementById('save-notification-prefs-btn')?.addEventListener('click', saveNotificationPreferences);
+
+    function updateOfflineState() {
+      offlineOverlayEl.classList.toggle('show', !navigator.onLine)
+    }
+
+    window.addEventListener('online', updateOfflineState)
+    window.addEventListener('offline', updateOfflineState)
 
     window.addEventListener('hashchange', () => {
       renderRoute();
@@ -889,6 +1020,11 @@
     renderListings();
     renderHostShellLists();
     renderRoute();
+    updateOfflineState();
+    window.addEventListener('load', () => {
+      setTimeout(() => appSplashEl.classList.add('hidden'), 450)
+    })
+    loadNotificationPreferences();
     if (getRoute() === 'host') {
       setHostPane('today');
       refreshHostPayouts();
