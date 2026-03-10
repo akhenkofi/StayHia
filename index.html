@@ -88,7 +88,7 @@
     .host-pane.active{display:block}
     #view-host{padding-bottom:92px}
     .host-bottom-nav{position:fixed;left:50%;transform:translateX(-50%);bottom:10px;z-index:80;max-width:1140px;width:calc(100% - 28px);background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px;display:grid;grid-template-columns:repeat(5,1fr);gap:6px;box-shadow:var(--shadow)}
-    .host-nav-btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 6px;font-weight:700;font-size:12px}
+    .host-nav-btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 6px;font-weight:700;font-size:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;line-height:1.05}
     .host-nav-btn.active{background:#111d46;color:#fff;border-color:#111d46}
     .unit-editor{display:none;position:fixed;inset:0;z-index:120;background:rgba(0,0,0,.35);padding:18px;overflow:auto}
     .unit-editor .card{max-width:680px;margin:40px auto 0 auto}
@@ -334,11 +334,11 @@
       </div>
 
       <div class="host-bottom-nav">
-        <button class="host-nav-btn active" data-host-target="today">Today</button>
-        <button class="host-nav-btn" data-host-target="calendar">Calendar</button>
-        <button class="host-nav-btn" data-host-target="listings">Listings</button>
-        <button class="host-nav-btn" data-host-target="messages">Messages</button>
-        <button class="host-nav-btn" data-host-target="menu">Menu</button>
+        <button class="host-nav-btn active" data-host-target="today"><span class="tab-icon">☀️</span><span>Today</span></button>
+        <button class="host-nav-btn" data-host-target="calendar"><span class="tab-icon">📅</span><span>Calendar</span></button>
+        <button class="host-nav-btn" data-host-target="listings"><span class="tab-icon">🏠</span><span>Listings</span></button>
+        <button class="host-nav-btn" data-host-target="messages"><span class="tab-icon">💬</span><span>Messages</span></button>
+        <button class="host-nav-btn" data-host-target="menu"><span class="tab-icon">☰</span><span>Menu</span></button>
       </div>
 
       <div id="unit-editor" class="unit-editor" style="display:none">
