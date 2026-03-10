@@ -90,7 +90,8 @@
     .host-bottom-nav{position:fixed;left:50%;transform:translateX(-50%);bottom:10px;z-index:80;max-width:1140px;width:calc(100% - 28px);background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px;display:grid;grid-template-columns:repeat(5,1fr);gap:6px;box-shadow:var(--shadow)}
     .host-nav-btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 6px;font-weight:700;font-size:12px}
     .host-nav-btn.active{background:#111d46;color:#fff;border-color:#111d46}
-    .unit-editor{margin-top:12px}
+    .unit-editor{display:none;position:fixed;inset:0;z-index:120;background:rgba(0,0,0,.35);padding:18px;overflow:auto}
+    .unit-editor .card{max-width:680px;margin:40px auto 0 auto}
     .mode-switch{border:1px solid var(--line);background:#111d46;color:#fff;border-radius:999px;padding:8px 12px;font-weight:700;cursor:pointer}
     .traveler-shell{margin-top:14px}
     .traveler-tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:10px;z-index:85;max-width:1140px;width:calc(100% - 28px);display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:12px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px;box-shadow:var(--shadow)}
@@ -566,6 +567,7 @@
           card.className = 'listing-card';
           card.innerHTML = `<img src="${l.image}" alt="${l.name}" /><div class="listing-body"><p class="listing-title">${l.name}</p><p class="listing-meta">Tap to edit calendar & price</p></div>`;
           card.onclick = () => {
+            setHostPane('calendar');
             unitEditorEl.style.display = 'block';
             unitEditorTitleEl.textContent = `${l.name} calendar`;
             unitPriceInput.value = String(getEffectiveNightly(l));
@@ -862,6 +864,7 @@
     document.getElementById('unit-open-btn')?.addEventListener('click', () => { unitEditorStatusEl.textContent = 'Selected dates opened.'; });
     document.getElementById('unit-save-price-btn')?.addEventListener('click', () => { unitEditorStatusEl.textContent = `Nightly price updated to $${Number(unitPriceInput.value || 0)}.`; renderListings(); renderHostShellLists(); });
     document.getElementById('unit-close-btn')?.addEventListener('click', () => { unitEditorEl.style.display = 'none'; });
+    unitEditorEl?.addEventListener('click', (e) => { if (e.target === unitEditorEl) unitEditorEl.style.display = 'none'; });
     applyHostPricingBtn?.addEventListener('click', () => {
       const mode = hostPricingModeInput.value === 'manual' ? 'manual' : 'smart';
       const manualNightly = Math.max(1, Number(hostManualNightlyInput.value || selectedListing.nightly));
