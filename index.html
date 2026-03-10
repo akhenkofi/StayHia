@@ -81,6 +81,7 @@
         <a class="chip route-link active" data-route="search" href="#/search">Search</a>
         <a class="chip route-link" data-route="listing" href="#/listing">Listing</a>
         <a class="chip route-link" data-route="checkout" href="#/checkout">Checkout</a>
+        <a class="chip route-link" data-route="host" href="#/host">Host</a>
         <a class="chip" href="/legal/terms.html">Terms</a>
         <a class="chip" href="/legal/privacy.html">Privacy</a>
       </nav>
@@ -112,12 +113,12 @@
       </div>
       <div class="layout">
         <article class="card">
-          <h3>Result preview: Harmony Bay Loft</h3>
-          <p class="muted">4.93 ★ • Superhost • Beach access • Free cancellation by Mar 15</p>
+          <h3>Featured stays in Ghana</h3>
+          <div id="search-listings" class="list"></div>
         </article>
         <article class="card">
-          <span class="pill info">Ranking signal placeholders</span>
-          <p class="muted">Price competitiveness, rating confidence, host response rate, and policy flexibility hooks staged.</p>
+          <span class="pill info">Selected listing</span>
+          <p id="selected-listing-summary" class="muted">Select a listing to continue.</p>
         </article>
       </div>
     </section>
@@ -127,11 +128,11 @@
       <p class="muted">Review amenities, host trust profile, and cancellation terms before you book.</p>
       <div class="layout">
         <article class="card">
-          <h3>What this place offers</h3>
-          <p class="muted">Ocean view • Dedicated workspace • Fast Wi-Fi • Self check-in • Free parking</p>
+          <h3 id="listing-name">What this place offers</h3>
+          <p id="listing-amenities" class="muted">Ocean view • Dedicated workspace • Fast Wi-Fi • Self check-in • Free parking</p>
           <div class="line"></div>
           <h3>Host trust profile</h3>
-          <p class="muted">Hosted by Ama • 5 years hosting • 98% response rate • Identity verified</p>
+          <p id="listing-host" class="muted">Hosted by Ama • 5 years hosting • 98% response rate • Identity verified</p>
         </article>
         <article class="card">
           <h3>Cancellation at a glance</h3>
@@ -183,6 +184,45 @@
       </div>
     </section>
 
+    <section id="view-host" class="panel view" aria-labelledby="host-title">
+      <h2 id="host-title">Host earnings dashboard</h2>
+      <p class="muted">Monitor payout pipeline, release timing, and reconciliation activity in one place.</p>
+      <div class="layout">
+        <article class="card">
+          <h3>Payout controls</h3>
+          <input id="host-id-input" class="input" value="host_ama" aria-label="Host ID" placeholder="Host ID" />
+          <div class="search-row" style="grid-template-columns:1fr 1fr auto;margin-top:10px">
+            <select id="payout-status-filter" class="input" aria-label="Payout status filter">
+              <option value="">All statuses</option>
+              <option value="PENDING_RELEASE">Pending release</option>
+              <option value="RELEASED">Released</option>
+            </select>
+            <input id="payout-limit-input" class="input" value="50" aria-label="Payout limit" />
+            <button id="refresh-payouts-btn" class="btn btn-primary" type="button">Refresh payouts</button>
+          </div>
+          <div class="cta" style="margin-top:10px">
+            <button id="run-reconcile-btn" class="btn btn-secondary" type="button">Run Reconciliation</button>
+            <button id="refresh-reconcile-events-btn" class="btn btn-secondary" type="button">Load Reconcile Timeline</button>
+          </div>
+          <p id="host-dashboard-status" class="muted" style="margin-top:10px">Host dashboard idle.</p>
+        </article>
+        <article class="card">
+          <h3>Earnings summary</h3>
+          <div class="kpi" style="margin-top:0">
+            <div class="box"><span class="sub">Total payouts</span><b id="host-total-payouts">0</b></div>
+            <div class="box"><span class="sub">Pending amount</span><b id="host-pending-amount">$0</b></div>
+            <div class="box"><span class="sub">Released amount</span><b id="host-released-amount">$0</b></div>
+          </div>
+          <div class="line"></div>
+          <h3 style="margin-top:0">Payout timeline</h3>
+          <p id="host-payout-list" class="muted">No payout rows loaded.</p>
+          <div class="line"></div>
+          <h3 style="margin-top:0">Reconciliation feed</h3>
+          <p id="host-reconcile-list" class="muted">No reconciliation events loaded.</p>
+        </article>
+      </div>
+    </section>
+
     <section class="status">
       <article class="card">
         <h3>Why guests book with StayHia</h3>
@@ -206,16 +246,46 @@
     const views = {
       search: document.getElementById('view-search'),
       listing: document.getElementById('view-listing'),
-      checkout: document.getElementById('view-checkout')
+      checkout: document.getElementById('view-checkout'),
+      host: document.getElementById('view-host')
     };
 
     const API_BASE = `${location.protocol}//api.stayhia.com`;
+    const searchListingsEl = document.getElementById('search-listings');
+    const selectedListingSummaryEl = document.getElementById('selected-listing-summary');
+    const listingNameEl = document.getElementById('listing-name');
+    const listingAmenitiesEl = document.getElementById('listing-amenities');
+    const listingHostEl = document.getElementById('listing-host');
+
+    const ghanaListings = [
+      { listingId:'listing_harmony_bay_loft', name:'Harmony Bay Loft', area:'Volta Region • New Las Vegas Ghana', hostId:'host_ama', host:'Ama', rating:4.93, nightly:132, amenities:'Ocean view • Dedicated workspace • Fast Wi‑Fi • Self check‑in • Free parking' },
+      { listingId:'listing_amarna_hill_villa', name:'Amarna Hill Villa', area:'Volta Region • New Las Vegas Ghana', hostId:'host_kwame', host:'Kwame', rating:4.88, nightly:148, amenities:'Hill view • 3BR • Balcony • Chef-ready kitchen • Backup power' },
+      { listingId:'listing_keta_lagoon_suite', name:'Keta Lagoon Suite', area:'Volta Region', hostId:'host_efua', host:'Efua', rating:4.74, nightly:96, amenities:'Lagoon access • AC • Breakfast • Wi‑Fi' },
+      { listingId:'listing_ho_city_modern_flat', name:'Ho City Modern Flat', area:'Volta Region', hostId:'host_kofi', host:'Kofi', rating:4.69, nightly:78, amenities:'City center • Fast internet • Smart TV • Parking' },
+      { listingId:'listing_ada_estuary_escape', name:'Ada Estuary Escape', area:'Greater Accra', hostId:'host_adjoa', host:'Adjoa', rating:4.81, nightly:119, amenities:'Waterfront • Pool • Boat pickup • Patio' },
+      { listingId:'listing_cape_coast_courtyard', name:'Cape Coast Courtyard Stay', area:'Central Region', hostId:'host_yaw', host:'Yaw', rating:4.72, nightly:89, amenities:'Historic district • Courtyard • AC • Breakfast' },
+      { listingId:'listing_kumasi_garden_home', name:'Kumasi Garden Home', area:'Ashanti Region', hostId:'host_nana', host:'Nana', rating:4.77, nightly:101, amenities:'Garden • Family friendly • Secure compound' },
+      { listingId:'listing_tamale_savannah_lodge', name:'Tamale Savannah Lodge', area:'Northern Region', hostId:'host_salim', host:'Salim', rating:4.66, nightly:84, amenities:'Quiet compound • AC • Work desk • Airport transfer' },
+      { listingId:'listing_takoradi_marina_studio', name:'Takoradi Marina Studio', area:'Western Region', hostId:'host_akos', host:'Akos', rating:4.71, nightly:92, amenities:'Marina view • Studio • Wi‑Fi • Kitchenette' },
+      { listingId:'listing_bolga_culture_house', name:'Bolga Culture House', area:'Upper East Region', hostId:'host_abena', host:'Abena', rating:4.63, nightly:73, amenities:'Traditional design • Guided tours • Breakfast' }
+    ];
+    let selectedListing = ghanaListings[0];
+
     const quoteStatusEl = document.getElementById('quote-status');
     const bookingStatusEl = document.getElementById('booking-status');
     const paymentStatusEl = document.getElementById('payment-status');
     const bookingStateEl = document.getElementById('booking-state');
     const idempotencyKeyInput = document.getElementById('checkout-idempotency-key');
     const paymentIntentInput = document.getElementById('payment-intent-id');
+    const hostIdInput = document.getElementById('host-id-input');
+    const payoutStatusFilter = document.getElementById('payout-status-filter');
+    const payoutLimitInput = document.getElementById('payout-limit-input');
+    const hostDashboardStatusEl = document.getElementById('host-dashboard-status');
+    const hostTotalPayoutsEl = document.getElementById('host-total-payouts');
+    const hostPendingAmountEl = document.getElementById('host-pending-amount');
+    const hostReleasedAmountEl = document.getElementById('host-released-amount');
+    const hostPayoutListEl = document.getElementById('host-payout-list');
+    const hostReconcileListEl = document.getElementById('host-reconcile-list');
 
     let currentQuote = null;
     let currentBooking = null;
@@ -231,6 +301,33 @@
       Object.entries(views).forEach(([name, el]) => el.classList.toggle('active', name === route));
       routeLinks.forEach(link => link.classList.toggle('active', link.dataset.route === route));
       document.title = `StayHia • ${route.charAt(0).toUpperCase() + route.slice(1)}`;
+    }
+
+    function renderListings() {
+      searchListingsEl.innerHTML = '';
+      ghanaListings.forEach((l) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn btn-secondary';
+        btn.style.width = '100%';
+        btn.style.textAlign = 'left';
+        btn.style.marginBottom = '8px';
+        btn.textContent = `${l.name} • ${l.area} • ${l.rating}★ • $${l.nightly}/night`;
+        btn.onclick = () => {
+          selectedListing = l;
+          selectedListingSummaryEl.textContent = `${l.name} (${l.area}) selected.`;
+          listingNameEl.textContent = l.name;
+          listingAmenitiesEl.textContent = l.amenities;
+          listingHostEl.textContent = `Hosted by ${l.host} • ${l.rating} ★ • Identity verified`;
+          location.hash = '#/listing';
+          renderRoute();
+        };
+        searchListingsEl.appendChild(btn);
+      });
+      selectedListingSummaryEl.textContent = `${selectedListing.name} (${selectedListing.area}) selected.`;
+      listingNameEl.textContent = selectedListing.name;
+      listingAmenitiesEl.textContent = selectedListing.amenities;
+      listingHostEl.textContent = `Hosted by ${selectedListing.host} • ${selectedListing.rating} ★ • Identity verified`;
     }
 
     function setQuoteStatus(text) {
@@ -268,18 +365,23 @@
     async function createQuote() {
       try {
         setQuoteStatus('creating…');
+        const nightlyTotal = selectedListing.nightly * 4;
+        const cleaningFee = Math.round(selectedListing.nightly * 0.27);
+        const serviceFee = Math.round(selectedListing.nightly * 0.32);
+        const taxes = Math.round((nightlyTotal + cleaningFee + serviceFee) * 0.05);
+
         const quote = await api('/v1/quotes', 'POST', {
-          listingId: 'listing_harmony_bay_loft',
-          hostId: 'host_ama',
+          listingId: selectedListing.listingId,
+          hostId: selectedListing.hostId,
           guestId: 'guest_demo',
           checkIn: '2026-03-18',
           checkOut: '2026-03-22',
           guests: 2,
           fees: {
-            nightlyTotal: 528,
-            cleaningFee: 36,
-            serviceFee: 42,
-            taxes: 29,
+            nightlyTotal,
+            cleaningFee,
+            serviceFee,
+            taxes,
             discount: 0,
             currency: 'USD'
           }
@@ -378,6 +480,92 @@
       }
     }
 
+    function formatMoney(amount, currency = 'USD') {
+      const value = Number(amount || 0);
+      return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(value);
+    }
+
+    function setHostDashboardStatus(text) {
+      hostDashboardStatusEl.textContent = text;
+    }
+
+    function renderHostPayoutRows(payouts = []) {
+      if (!payouts.length) {
+        hostPayoutListEl.textContent = 'No payout rows match this filter.';
+        return;
+      }
+
+      const lines = payouts.slice(0, 6).map((row) => {
+        const eta = row.eta?.estimatedAvailableAt || row.estimatedAvailableAt || 'n/a';
+        return `${row.payoutId} • ${row.state} • ${formatMoney(row.amount, row.currency)} • ETA ${new Date(eta).toLocaleString()}`;
+      });
+      hostPayoutListEl.textContent = lines.join(' | ');
+    }
+
+    function renderReconciliationRows(events = []) {
+      if (!events.length) {
+        hostReconcileListEl.textContent = 'No reconciliation events yet.';
+        return;
+      }
+
+      const lines = events.slice(0, 6).map((event) => `${event.type} • ${event.payoutId} • ${new Date(event.at).toLocaleString()}`);
+      hostReconcileListEl.textContent = lines.join(' | ');
+    }
+
+    async function refreshHostPayouts() {
+      try {
+        const hostId = (hostIdInput.value || '').trim();
+        if (!hostId) {
+          setHostDashboardStatus('Host ID required.');
+          return;
+        }
+
+        const status = (payoutStatusFilter.value || '').trim();
+        const limit = Number(payoutLimitInput.value || 50);
+        const params = new URLSearchParams();
+        if (status) params.set('status', status);
+        if (Number.isFinite(limit) && limit > 0) params.set('limit', String(limit));
+
+        setHostDashboardStatus('Loading payouts…');
+        const query = params.toString();
+        const payload = await api(`/v1/hosts/${encodeURIComponent(hostId)}/payouts${query ? `?${query}` : ''}`);
+
+        const totals = payload.payouts.reduce((acc, row) => {
+          if (row.state === 'PENDING_RELEASE') acc.pending += Number(row.amount || 0);
+          if (row.state === 'RELEASED') acc.released += Number(row.amount || 0);
+          return acc;
+        }, { pending: 0, released: 0 });
+
+        hostTotalPayoutsEl.textContent = String(payload.count || 0);
+        hostPendingAmountEl.textContent = formatMoney(totals.pending);
+        hostReleasedAmountEl.textContent = formatMoney(totals.released);
+        renderHostPayoutRows(payload.payouts || []);
+        setHostDashboardStatus(`Loaded ${payload.count || 0} payout rows for ${payload.hostId}.`);
+      } catch (err) {
+        setHostDashboardStatus(`Payout load failed: ${err.message}`);
+      }
+    }
+
+    async function runPayoutReconciliation() {
+      try {
+        setHostDashboardStatus('Running reconciliation…');
+        const result = await api('/v1/payouts/reconcile', 'POST', { source: 'host_dashboard_ui', limit: 50 });
+        setHostDashboardStatus(`Reconciliation complete: released ${result.releasedCount || 0} payouts.`);
+        await refreshHostPayouts();
+      } catch (err) {
+        setHostDashboardStatus(`Reconciliation failed: ${err.message}`);
+      }
+    }
+
+    async function refreshReconciliationEvents() {
+      try {
+        const payload = await api('/v1/payouts/reconciliation-events?limit=25');
+        renderReconciliationRows(payload.events || []);
+      } catch (err) {
+        setHostDashboardStatus(`Timeline load failed: ${err.message}`);
+      }
+    }
+
     document.getElementById('search-quote-btn')?.addEventListener('click', createQuote);
     document.getElementById('create-quote-btn')?.addEventListener('click', createQuote);
     document.getElementById('create-booking-btn')?.addEventListener('click', createBooking);
@@ -388,9 +576,23 @@
       idempotencyKey: `${idempotencyKeyInput.value || 'demo-key'}-confirm`
     }));
     document.getElementById('cancel-booking-btn')?.addEventListener('click', () => mutateBooking('cancel'));
+    document.getElementById('refresh-payouts-btn')?.addEventListener('click', refreshHostPayouts);
+    document.getElementById('run-reconcile-btn')?.addEventListener('click', runPayoutReconciliation);
+    document.getElementById('refresh-reconcile-events-btn')?.addEventListener('click', refreshReconciliationEvents);
 
-    window.addEventListener('hashchange', renderRoute);
+    window.addEventListener('hashchange', () => {
+      renderRoute();
+      if (getRoute() === 'host') {
+        refreshHostPayouts();
+        refreshReconciliationEvents();
+      }
+    });
+    renderListings();
     renderRoute();
+    if (getRoute() === 'host') {
+      refreshHostPayouts();
+      refreshReconciliationEvents();
+    }
   </script>
 </body>
 </html>
