@@ -205,6 +205,10 @@
           <p id="booking-state" class="muted">No booking created yet.</p>
         </article>
       </div>
+      <article class="card" style="margin-top:12px">
+        <h3>Guest reviews</h3>
+        <p id="listing-reviews" class="muted">★★★★★ “Beautiful stay, easy check-in, accurate listing.” • “Great host communication.”</p>
+      </article>
     </section>
 
     <section id="view-checkout" class="panel view" aria-labelledby="checkout-title">
@@ -394,9 +398,10 @@
     const listingNameEl = document.getElementById('listing-name');
     const listingAmenitiesEl = document.getElementById('listing-amenities');
     const listingHostEl = document.getElementById('listing-host');
+    const listingReviewsEl = document.getElementById('listing-reviews');
 
     const ghanaListings = [
-      { listingId:'listing_harmony_bay_loft', name:'Harmony Bay Loft', area:'Volta Region • New Las Vegas Ghana', hostId:'host_ama', host:'Ama', rating:4.93, nightly:132, image:'https://images.unsplash.com/photo-1430285561322-7808604715df?auto=format&fit=crop&w=1600&q=80', amenities:'Ocean view • Dedicated workspace • Fast Wi‑Fi • Self check‑in • Free parking' },
+      { listingId:'listing_harmony_bay_loft', name:'Harmony Bay Loft', area:'Volta Region • New Las Vegas Ghana', hostId:'host_ama', host:'Ama', rating:4.93, nightly:132, image:'https://images.unsplash.com/photo-1430285561322-7808604715df?auto=format&fit=crop&w=1600&q=80', amenities:'Ocean view • Dedicated workspace • Fast Wi‑Fi • Self check‑in • Free parking', superhost:true, guestFavorite:true, reviews:164 },
       { listingId:'listing_amarna_hill_villa', name:'Amarna Hill Villa', area:'Volta Region • New Las Vegas Ghana', hostId:'host_kwame', host:'Kwame', rating:4.88, nightly:148, image:'https://images.unsplash.com/photo-1605146769289-440113cc3d00?auto=format&fit=crop&w=1600&q=80', amenities:'Hill view • 3BR • Balcony • Chef-ready kitchen • Backup power' },
       { listingId:'listing_keta_lagoon_suite', name:'Keta Lagoon Suite', area:'Volta Region', hostId:'host_efua', host:'Efua', rating:4.74, nightly:96, image:'https://images.unsplash.com/photo-1600607687644-aac4c3eac7f4?auto=format&fit=crop&w=1600&q=80', amenities:'Lagoon access • AC • Breakfast • Wi‑Fi' },
       { listingId:'listing_ho_city_modern_flat', name:'Ho City Modern Flat', area:'Volta Region', hostId:'host_kofi', host:'Kofi', rating:4.69, nightly:78, image:'https://images.unsplash.com/photo-1600210492493-0946911123ea?auto=format&fit=crop&w=1600&q=80', amenities:'City center • Fast internet • Smart TV • Parking' },
@@ -411,6 +416,12 @@
       { listingId:'listing_wa_sunset_haven', name:'Wa Sunset Haven', area:'Upper West Region', hostId:'host_fati', host:'Fati', rating:4.68, nightly:81, image:'https://images.unsplash.com/photo-1600210492499-09410fdc4d04?auto=format&fit=crop&w=1600&q=80', amenities:'Spacious rooms • AC • Courtyard • Private parking' },
       { listingId:'listing_koforidua_mountain_view', name:'Koforidua Mountain View', area:'Eastern Region', hostId:'host_dan', host:'Dan', rating:4.76, nightly:99, image:'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1600&q=80', amenities:'Mountain breeze • Family suite • Kitchen • Patio' }
     ];
+    ghanaListings.forEach((l, i) => {
+      if (!l.image) l.image = 'https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1600&q=80';
+      if (!Number.isFinite(l.reviews)) l.reviews = 40 + (i * 9);
+      if (typeof l.superhost !== 'boolean') l.superhost = i % 3 === 0;
+      if (typeof l.guestFavorite !== 'boolean') l.guestFavorite = i % 2 === 0;
+    });
     let selectedListing = null;
     const hostPricingByListing = {};
 
@@ -510,12 +521,15 @@
         const nightly = getEffectiveNightly(l);
         const card = document.createElement('div');
         card.className = 'listing-card';
+        const img = l.image || 'https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1600&q=80';
+        const badges = [l.superhost ? 'Superhost' : '', l.guestFavorite ? 'Guest favorite' : ''].filter(Boolean).join(' • ');
         card.innerHTML = `
-          <img src="${l.image}" alt="${l.name}" />
+          <img src="${img}" alt="${l.name}" />
           <div class="listing-body">
             <p class="listing-title">${l.name}</p>
             <p class="listing-meta">${l.area}</p>
-            <p class="listing-meta">${l.rating}★ • $${nightly}/night</p>
+            <p class="listing-meta">${l.rating}★ (${l.reviews || 0} reviews) • $${nightly}/night</p>
+            ${badges ? `<p class="listing-meta">${badges}</p>` : ''}
           </div>
         `;
         card.onclick = () => {
@@ -523,7 +537,8 @@
           selectedListingSummaryEl.textContent = `${l.name} (${l.area}) selected.`;
           listingNameEl.textContent = l.name;
           listingAmenitiesEl.textContent = l.amenities;
-          listingHostEl.textContent = `Hosted by ${l.host} • ${l.rating} ★ • Identity verified`;
+          listingHostEl.textContent = `Hosted by ${l.host}${l.superhost ? ' • Superhost' : ''} • ${l.rating} ★ (${l.reviews || 0} reviews)${l.guestFavorite ? ' • Guest favorite' : ''} • Identity verified`;
+          listingReviewsEl.textContent = `★ ${l.rating} (${l.reviews || 0} reviews) • “Spotless, stylish, and accurate.” • “Great location and quick support.”`;
           refreshHostPricingPanel();
           location.hash = '#/listing';
           renderRoute();
@@ -534,13 +549,15 @@
         selectedListingSummaryEl.textContent = `${selectedListing.name} (${selectedListing.area}) selected.`;
         listingNameEl.textContent = selectedListing.name;
         listingAmenitiesEl.textContent = selectedListing.amenities;
-        listingHostEl.textContent = `Hosted by ${selectedListing.host} • ${selectedListing.rating} ★ • Identity verified`;
+        listingHostEl.textContent = `Hosted by ${selectedListing.host}${selectedListing.superhost ? ' • Superhost' : ''} • ${selectedListing.rating} ★ (${selectedListing.reviews || 0} reviews)${selectedListing.guestFavorite ? ' • Guest favorite' : ''} • Identity verified`;
+        listingReviewsEl.textContent = `★ ${selectedListing.rating} (${selectedListing.reviews || 0} reviews) • “Spotless, stylish, and accurate.” • “Great location and quick support.”`;
         refreshHostPricingPanel();
       } else {
         selectedListingSummaryEl.textContent = 'No listing selected yet.';
         listingNameEl.textContent = 'Stay details';
         listingAmenitiesEl.textContent = 'Select any listing card above to preview amenities and host profile.';
         listingHostEl.textContent = 'Host trust details appear after listing selection.';
+        listingReviewsEl.textContent = 'Guest reviews will appear after you select a listing.';
       }
     }
 
