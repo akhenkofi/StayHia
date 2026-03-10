@@ -92,6 +92,8 @@
     .host-nav-btn.active{background:#111d46;color:#fff;border-color:#111d46}
     .unit-editor{display:none;position:fixed;inset:0;z-index:120;background:rgba(0,0,0,.35);padding:18px;overflow:auto}
     .unit-editor .card{max-width:680px;margin:40px auto 0 auto}
+    .calendar-edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+    .calendar-preview{margin-top:10px;border:1px solid var(--line);border-radius:10px;padding:10px;background:#fff}
     .mode-switch{border:1px solid var(--line);background:#111d46;color:#fff;border-radius:999px;padding:8px 12px;font-weight:700;cursor:pointer}
     .traveler-shell{margin-top:14px}
     .traveler-tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:10px;z-index:85;max-width:1140px;width:calc(100% - 28px);display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:12px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px;box-shadow:var(--shadow)}
@@ -406,8 +408,22 @@
       <div id="unit-editor" class="unit-editor" style="display:none">
         <div class="card">
           <h3 id="unit-editor-title">Unit calendar</h3>
-          <p class="muted">Block/open selected dates and edit nightly price.</p>
-          <input id="unit-price-input" class="input" value="120" placeholder="Nightly price (USD)" />
+          <p class="muted">Select check-in/check-out range, then block/open dates and edit nightly price.</p>
+          <div class="calendar-edit-grid">
+            <div>
+              <label class="muted" for="unit-date-start">From</label>
+              <input id="unit-date-start" class="input" type="date" />
+            </div>
+            <div>
+              <label class="muted" for="unit-date-end">To</label>
+              <input id="unit-date-end" class="input" type="date" />
+            </div>
+          </div>
+          <div class="calendar-preview">
+            <strong>Selected range</strong>
+            <p id="unit-date-preview" class="muted" style="margin:6px 0 0 0">No dates selected yet.</p>
+          </div>
+          <input id="unit-price-input" class="input" value="120" placeholder="Nightly price (USD)" style="margin-top:10px" />
           <div class="cta" style="margin-top:10px">
             <button id="unit-block-btn" class="btn btn-secondary" type="button">Block dates</button>
             <button id="unit-open-btn" class="btn btn-secondary" type="button">Open dates</button>
@@ -521,6 +537,9 @@
     const unitEditorEl = document.getElementById('unit-editor');
     const unitEditorTitleEl = document.getElementById('unit-editor-title');
     const unitPriceInput = document.getElementById('unit-price-input');
+    const unitDateStartInput = document.getElementById('unit-date-start');
+    const unitDateEndInput = document.getElementById('unit-date-end');
+    const unitDatePreviewEl = document.getElementById('unit-date-preview');
     const unitEditorStatusEl = document.getElementById('unit-editor-status');
     const notificationUserIdInput = document.getElementById('notification-user-id');
     const notifChannelInAppInput = document.getElementById('notif-channel-in-app');
@@ -751,6 +770,12 @@
             unitEditorEl.style.display = 'block';
             unitEditorTitleEl.textContent = `${l.name} calendar`;
             unitPriceInput.value = String(getEffectiveNightly(l));
+            const today = new Date();
+            const start = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+            const end = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 3);
+            unitDateStartInput.value = start.toISOString().slice(0,10);
+            unitDateEndInput.value = end.toISOString().slice(0,10);
+            unitDatePreviewEl.textContent = `${unitDateStartInput.value} → ${unitDateEndInput.value}`;
             unitEditorStatusEl.textContent = 'Ready.';
           };
           hostCalendarUnitsEl.appendChild(card);
@@ -1114,8 +1139,22 @@
     document.getElementById('cancel-booking-btn')?.addEventListener('click', () => mutateBooking('cancel'));
     document.getElementById('refresh-payouts-btn')?.addEventListener('click', refreshHostPayouts);
     hostNavBtns.forEach(btn => btn.addEventListener('click', () => setHostPane(btn.dataset.hostTarget || 'today')));
-    document.getElementById('unit-block-btn')?.addEventListener('click', () => { unitEditorStatusEl.textContent = 'Selected dates blocked.'; });
-    document.getElementById('unit-open-btn')?.addEventListener('click', () => { unitEditorStatusEl.textContent = 'Selected dates opened.'; });
+    const refreshUnitDatePreview = () => {
+      if (unitDateStartInput.value && unitDateEndInput.value) unitDatePreviewEl.textContent = `${unitDateStartInput.value} → ${unitDateEndInput.value}`;
+      else if (unitDateStartInput.value) unitDatePreviewEl.textContent = `${unitDateStartInput.value} → (select end date)`;
+      else unitDatePreviewEl.textContent = 'No dates selected yet.';
+    };
+    unitDateStartInput?.addEventListener('change', refreshUnitDatePreview);
+    unitDateEndInput?.addEventListener('change', refreshUnitDatePreview);
+
+    document.getElementById('unit-block-btn')?.addEventListener('click', () => {
+      refreshUnitDatePreview();
+      unitEditorStatusEl.textContent = `Blocked: ${unitDatePreviewEl.textContent}`;
+    });
+    document.getElementById('unit-open-btn')?.addEventListener('click', () => {
+      refreshUnitDatePreview();
+      unitEditorStatusEl.textContent = `Opened: ${unitDatePreviewEl.textContent}`;
+    });
     document.getElementById('unit-save-price-btn')?.addEventListener('click', () => { unitEditorStatusEl.textContent = `Nightly price updated to $${Number(unitPriceInput.value || 0)}.`; renderListings(); renderHostShellLists(); });
     document.getElementById('unit-close-btn')?.addEventListener('click', () => { unitEditorEl.style.display = 'none'; });
     unitEditorEl?.addEventListener('click', (e) => { if (e.target === unitEditorEl) unitEditorEl.style.display = 'none'; });
