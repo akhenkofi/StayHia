@@ -162,11 +162,12 @@
       <h2 id="search-title">Find your perfect stay</h2>
       <p class="muted">Search by destination, travel dates, and guest count to discover the best match.</p>
       <div class="search-row">
-        <input id="search-destination" class="input" value="Accra, Ghana" aria-label="Destination" />
-        <input id="search-dates" class="input" value="Mar 18 → Mar 22" aria-label="Dates" />
-        <input id="search-guests" class="input" value="2 Guests" aria-label="Guests" />
-        <input id="search-type" class="input" value="Entire place" aria-label="Type" />
+        <input id="search-destination" class="input" value="" placeholder="Destination" aria-label="Destination" />
+        <input id="search-dates" class="input" value="" placeholder="Dates" aria-label="Dates" />
+        <input id="search-guests" class="input" value="" placeholder="Guests" aria-label="Guests" />
+        <input id="search-type" class="input" value="" placeholder="Type" aria-label="Type" />
         <button id="search-quote-btn" class="btn btn-primary" type="button">Get Live Quote</button>
+        <button id="show-all-units-btn" class="btn" type="button">Show all 8 units</button>
       </div>
       <p id="search-results-meta" class="muted">Ranking: recommended for your current filters.</p>
       <div class="layout">
@@ -284,6 +285,10 @@
           <h3>Policy snapshot</h3>
           <span class="pill warn">Locked at booking confirmation</span>
           <p class="muted" style="margin-top:8px">Cancellation and refund terms are captured with the quote and preserved with your booking record hash.</p>
+          <label style="display:block;margin-top:10px"><input id="policy-acceptance-checkbox" type="checkbox" checked /> I accept Terms, Privacy, Cancellation, and Refund policies.</label>
+          <input id="policy-terms-version" class="input" style="margin-top:8px" value="terms_v1" aria-label="Terms Version" placeholder="terms_v1" />
+          <input id="policy-privacy-version" class="input" style="margin-top:8px" value="privacy_v1" aria-label="Privacy Version" placeholder="privacy_v1" />
+          <p id="policy-status" class="muted" style="margin-top:8px">Policy acceptance ready.</p>
           <a href="/legal/refunds.html">Refund policy details</a>
         </article>
         <article class="card">
@@ -503,6 +508,10 @@
     const bookingStateEl = document.getElementById('booking-state');
     const idempotencyKeyInput = document.getElementById('checkout-idempotency-key');
     const paymentIntentInput = document.getElementById('payment-intent-id');
+    const policyAcceptanceCheckbox = document.getElementById('policy-acceptance-checkbox');
+    const policyTermsVersionInput = document.getElementById('policy-terms-version');
+    const policyPrivacyVersionInput = document.getElementById('policy-privacy-version');
+    const policyStatusEl = document.getElementById('policy-status');
     const hostIdInput = document.getElementById('host-id-input');
     const payoutStatusFilter = document.getElementById('payout-status-filter');
     const payoutLimitInput = document.getElementById('payout-limit-input');
@@ -541,6 +550,7 @@
     const searchDatesInput = document.getElementById('search-dates');
     const searchGuestsInput = document.getElementById('search-guests');
     const searchTypeInput = document.getElementById('search-type');
+    const showAllUnitsBtn = document.getElementById('show-all-units-btn');
     const searchResultsMetaEl = document.getElementById('search-results-meta');
 
     let currentQuote = null;
@@ -698,7 +708,8 @@
       }
       rankedListings.forEach((l) => {
         const nightly = getEffectiveNightly(l);
-        const card = document.createElement('div');
+        const card = document.createElement('button');
+        card.type = 'button';
         card.className = 'listing-card';
         const img = l.image || 'https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1600&q=80';
         const badges = [l.superhost ? 'Superhost' : '', l.guestFavorite ? 'Guest favorite' : ''].filter(Boolean).join(' • ');
@@ -928,6 +939,12 @@
         return;
       }
 
+      if (!policyAcceptanceCheckbox.checked) {
+        policyStatusEl.textContent = 'Accept required policies to create booking.';
+        setBookingStatus('policy acceptance required');
+        return;
+      }
+
       try {
         setBookingStatus('creating…');
         const booking = await api('/v1/bookings', 'POST', {
@@ -935,11 +952,21 @@
           policy: {
             cancellationPolicyId: 'flexible_v1',
             houseRulesVersion: 'default_v1',
-            refundTermsVersion: 'refund_v1'
+            refundTermsVersion: 'refund_v1',
+            termsVersion: (policyTermsVersionInput.value || 'terms_v1').trim() || 'terms_v1',
+            privacyVersion: (policyPrivacyVersionInput.value || 'privacy_v1').trim() || 'privacy_v1'
+          },
+          policyAcceptance: {
+            accepted: policyAcceptanceCheckbox.checked,
+            acceptedAt: new Date().toISOString(),
+            userAgent: navigator.userAgent,
+            ipCountry: 'unknown'
           }
         });
 
         currentBooking = booking;
+        const acceptedAt = booking.policyAcceptance?.acceptedAt ? new Date(booking.policyAcceptance.acceptedAt).toLocaleString() : 'n/a';
+        policyStatusEl.textContent = `Accepted ${booking.policySnapshot?.termsVersion || 'terms_v1'} / ${booking.policySnapshot?.privacyVersion || 'privacy_v1'} at ${acceptedAt}`;
         setBookingStatus(`${booking.bookingId} • ${booking.state}`);
         syncBookingState(booking);
       } catch (err) {
@@ -1114,6 +1141,15 @@
     });
 
     document.getElementById('search-quote-btn')?.addEventListener('click', createQuote);
+    showAllUnitsBtn?.addEventListener('click', () => {
+      searchDestinationInput.value = '';
+      searchDatesInput.value = '';
+      searchGuestsInput.value = '';
+      searchTypeInput.value = '';
+      location.hash = '#/search/explore';
+      renderListings();
+      renderRoute();
+    });
     document.getElementById('create-quote-btn')?.addEventListener('click', createQuote);
     document.getElementById('create-booking-btn')?.addEventListener('click', createBooking);
     document.getElementById('create-payment-intent-btn')?.addEventListener('click', createPaymentIntent);
