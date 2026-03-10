@@ -204,6 +204,18 @@
             <button id="run-reconcile-btn" class="btn btn-secondary" type="button">Run Reconciliation</button>
             <button id="refresh-reconcile-events-btn" class="btn btn-secondary" type="button">Load Reconcile Timeline</button>
           </div>
+          <div class="line"></div>
+          <h3>Pricing controls</h3>
+          <p class="muted">Choose manual host price or smart pricing (demand/time adjusted).</p>
+          <div class="search-row" style="grid-template-columns:1fr 1fr auto">
+            <select id="host-pricing-mode" class="input" aria-label="Host pricing mode">
+              <option value="smart">Smart pricing</option>
+              <option value="manual">Manual price</option>
+            </select>
+            <input id="host-manual-nightly" class="input" value="132" aria-label="Manual nightly price" placeholder="Nightly price (USD)" />
+            <button id="apply-host-pricing-btn" class="btn btn-primary" type="button">Apply</button>
+          </div>
+          <p id="host-pricing-status" class="muted" style="margin-top:8px">Pricing mode: smart.</p>
           <p id="host-dashboard-status" class="muted" style="margin-top:10px">Host dashboard idle.</p>
         </article>
         <article class="card">
@@ -270,6 +282,7 @@
       { listingId:'listing_bolga_culture_house', name:'Bolga Culture House', area:'Upper East Region', hostId:'host_abena', host:'Abena', rating:4.63, nightly:73, amenities:'Traditional design • Guided tours • Breakfast' }
     ];
     let selectedListing = ghanaListings[0];
+    const hostPricingByListing = {};
 
     const quoteStatusEl = document.getElementById('quote-status');
     const bookingStatusEl = document.getElementById('booking-status');
@@ -281,6 +294,10 @@
     const payoutStatusFilter = document.getElementById('payout-status-filter');
     const payoutLimitInput = document.getElementById('payout-limit-input');
     const hostDashboardStatusEl = document.getElementById('host-dashboard-status');
+    const hostPricingModeInput = document.getElementById('host-pricing-mode');
+    const hostManualNightlyInput = document.getElementById('host-manual-nightly');
+    const applyHostPricingBtn = document.getElementById('apply-host-pricing-btn');
+    const hostPricingStatusEl = document.getElementById('host-pricing-status');
     const hostTotalPayoutsEl = document.getElementById('host-total-payouts');
     const hostPendingAmountEl = document.getElementById('host-pending-amount');
     const hostReleasedAmountEl = document.getElementById('host-released-amount');
@@ -303,6 +320,33 @@
       document.title = `StayHia • ${route.charAt(0).toUpperCase() + route.slice(1)}`;
     }
 
+    function getSmartNightlyPrice(listing) {
+      const base = Number(listing?.nightly || 100);
+      const now = new Date();
+      const day = now.getDay();
+      const month = now.getMonth() + 1;
+      const weekendMultiplier = (day === 5 || day === 6) ? 1.18 : 1;
+      const highSeasonMultiplier = [12,1,7,8].includes(month) ? 1.12 : 1;
+      const demandSignal = (listing?.rating || 4.6) >= 4.8 ? 1.08 : 1.0;
+      return Math.round(base * weekendMultiplier * highSeasonMultiplier * demandSignal);
+    }
+
+    function getEffectiveNightly(listing) {
+      const cfg = hostPricingByListing[listing.listingId];
+      if (cfg?.mode === 'manual' && Number(cfg.manualNightly) > 0) {
+        return Math.round(Number(cfg.manualNightly));
+      }
+      return getSmartNightlyPrice(listing);
+    }
+
+    function refreshHostPricingPanel() {
+      const cfg = hostPricingByListing[selectedListing.listingId] || { mode: 'smart', manualNightly: selectedListing.nightly };
+      hostPricingModeInput.value = cfg.mode;
+      hostManualNightlyInput.value = String(cfg.manualNightly || selectedListing.nightly);
+      const nightly = getEffectiveNightly(selectedListing);
+      hostPricingStatusEl.textContent = `Pricing mode: ${cfg.mode} • Effective nightly: $${nightly}`;
+    }
+
     function renderListings() {
       searchListingsEl.innerHTML = '';
       ghanaListings.forEach((l) => {
@@ -312,13 +356,15 @@
         btn.style.width = '100%';
         btn.style.textAlign = 'left';
         btn.style.marginBottom = '8px';
-        btn.textContent = `${l.name} • ${l.area} • ${l.rating}★ • $${l.nightly}/night`;
+        const nightly = getEffectiveNightly(l);
+        btn.textContent = `${l.name} • ${l.area} • ${l.rating}★ • $${nightly}/night`;
         btn.onclick = () => {
           selectedListing = l;
           selectedListingSummaryEl.textContent = `${l.name} (${l.area}) selected.`;
           listingNameEl.textContent = l.name;
           listingAmenitiesEl.textContent = l.amenities;
           listingHostEl.textContent = `Hosted by ${l.host} • ${l.rating} ★ • Identity verified`;
+          refreshHostPricingPanel();
           location.hash = '#/listing';
           renderRoute();
         };
@@ -328,6 +374,7 @@
       listingNameEl.textContent = selectedListing.name;
       listingAmenitiesEl.textContent = selectedListing.amenities;
       listingHostEl.textContent = `Hosted by ${selectedListing.host} • ${selectedListing.rating} ★ • Identity verified`;
+      refreshHostPricingPanel();
     }
 
     function setQuoteStatus(text) {
@@ -365,9 +412,10 @@
     async function createQuote() {
       try {
         setQuoteStatus('creating…');
-        const nightlyTotal = selectedListing.nightly * 4;
-        const cleaningFee = Math.round(selectedListing.nightly * 0.27);
-        const serviceFee = Math.round(selectedListing.nightly * 0.32);
+        const nightly = getEffectiveNightly(selectedListing);
+        const nightlyTotal = nightly * 4;
+        const cleaningFee = Math.round(nightly * 0.27);
+        const serviceFee = Math.round(nightly * 0.32);
         const taxes = Math.round((nightlyTotal + cleaningFee + serviceFee) * 0.05);
 
         const quote = await api('/v1/quotes', 'POST', {
@@ -577,6 +625,13 @@
     }));
     document.getElementById('cancel-booking-btn')?.addEventListener('click', () => mutateBooking('cancel'));
     document.getElementById('refresh-payouts-btn')?.addEventListener('click', refreshHostPayouts);
+    applyHostPricingBtn?.addEventListener('click', () => {
+      const mode = hostPricingModeInput.value === 'manual' ? 'manual' : 'smart';
+      const manualNightly = Math.max(1, Number(hostManualNightlyInput.value || selectedListing.nightly));
+      hostPricingByListing[selectedListing.listingId] = { mode, manualNightly };
+      refreshHostPricingPanel();
+      renderListings();
+    });
     document.getElementById('run-reconcile-btn')?.addEventListener('click', runPayoutReconciliation);
     document.getElementById('refresh-reconcile-events-btn')?.addEventListener('click', refreshReconciliationEvents);
 
