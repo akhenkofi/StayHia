@@ -37,15 +37,13 @@
     .chip{border:1px solid var(--line);background:#fff;padding:8px 12px;border-radius:999px;color:#203062;text-decoration:none;font-weight:700;cursor:pointer}
     .chip.active{background:#eef3ff;border-color:#cfdafe;color:#162a62}
 
-    .hero{margin-top:16px;background:linear-gradient(140deg,var(--navy) 0%, #1b2d6b 60%, #223e8e 100%);border-radius:24px;padding:26px;color:#fff;box-shadow:var(--shadow);display:grid;grid-template-columns:1.2fr .8fr;gap:18px;align-items:center}
-    .hero h1{font-size:40px;line-height:1.05;margin:0 0 10px}
-    .hero p{color:#dbe6ff;margin:0 0 16px;max-width:560px;line-height:1.5}
+    .hero{margin-top:16px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;color:var(--text);box-shadow:var(--shadow)}
+    .hero h1{font-size:28px;line-height:1.1;margin:0 0 8px}
+    .hero p{color:var(--muted);margin:0 0 12px;max-width:680px;line-height:1.45}
     .hero .cta{display:flex;gap:10px;flex-wrap:wrap}
     .btn{border:0;border-radius:12px;padding:11px 16px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block}
     .btn-primary{background:linear-gradient(135deg,var(--accent-2),var(--accent));color:#fff}
-    .btn-secondary{background:#ffffff1a;color:#fff;border:1px solid #ffffff3b}
-    .wordmark-card{background:#fff;border-radius:18px;padding:14px;border:1px solid #ffffff3a}
-    .wordmark-card img{width:100%;border-radius:12px;display:block}
+    .btn-secondary{background:#fff;color:#1b2d6b;border:1px solid var(--line)}
 
     .panel{margin-top:16px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:var(--shadow)}
     .panel h2{margin:0 0 8px}
@@ -124,16 +122,11 @@
     </header>
 
     <section class="hero">
-      <div>
-        <h1>Stay Here.<br/>Stay Anywhere.</h1>
-        <p>Find beautiful places to stay, book in minutes, and travel with confidence using clear pricing and transparent policies.</p>
-        <div class="cta">
-          <a class="btn btn-primary" href="#/search">Start Exploring</a>
-          <a class="btn btn-secondary" href="#/checkout">Book Your Stay</a>
-        </div>
-      </div>
-      <div class="wordmark-card">
-        <img src="/assets/stayhia-wordmark.jpg" alt="StayHia main logo" />
+      <h1>Find your next stay</h1>
+      <p>Explore homes, guest favorites, and trusted hosts across Ghana with quick, transparent booking.</p>
+      <div class="cta">
+        <a class="btn btn-primary" href="#/search">Start Exploring</a>
+        <a class="btn btn-secondary" href="#/checkout">Book Your Stay</a>
       </div>
     </section>
 
