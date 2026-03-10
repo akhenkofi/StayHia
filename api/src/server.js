@@ -32,6 +32,7 @@ const idempotencyRecords = new Map();
 const notificationQueue = [];
 const notificationDeliveryLog = new Map();
 const notificationPreferences = new Map();
+const hostAccounts = new Map();
 const payoutReconciliationEvents = [];
 
 const STATES = {
@@ -96,6 +97,7 @@ function loadRuntimeStore() {
     hydrateMap(idempotencyRecords, data.idempotencyRecords);
     hydrateMap(notificationDeliveryLog, data.notificationDeliveryLog);
     hydrateMap(notificationPreferences, data.notificationPreferences);
+    hydrateMap(hostAccounts, data.hostAccounts);
 
     for (const row of data.notificationQueue || []) {
       notificationQueue.push(row);
@@ -124,6 +126,7 @@ function persistRuntimeStore(reason = "unspecified") {
       notificationQueue: notificationQueue.length,
       notificationDeliveryLog: notificationDeliveryLog.size,
       notificationPreferences: notificationPreferences.size,
+      hostAccounts: hostAccounts.size,
       payoutReconciliationEvents: payoutReconciliationEvents.length
     },
     quotes: mapEntriesToObject(quotes),
@@ -134,6 +137,7 @@ function persistRuntimeStore(reason = "unspecified") {
     notificationQueue,
     notificationDeliveryLog: mapEntriesToObject(notificationDeliveryLog),
     notificationPreferences: mapEntriesToObject(notificationPreferences),
+    hostAccounts: mapEntriesToObject(hostAccounts),
     payoutReconciliationEvents
   };
 
@@ -570,6 +574,7 @@ async function handler(req, res) {
       notificationDedupeWindowMs: NOTIFY_DEDUPE_WINDOW_MS,
       quietHours: { startHour: QUIET_HOURS_START, endHour: QUIET_HOURS_END },
       notificationPreferenceProfiles: notificationPreferences.size,
+      hostAccountCount: hostAccounts.size,
       paymentIntentCount: paymentIntents.size,
       payoutRecordCount: payoutRecords.size,
       payoutReconciliationEventCount: payoutReconciliationEvents.length,
@@ -973,6 +978,52 @@ async function handler(req, res) {
     notificationPreferences.set(userId, next);
     persistRuntimeStore("notification_preferences_updated");
     return send(res, 200, next);
+  }
+
+  if (req.method === "POST" && req.url === "/v1/host-accounts") {
+    const body = await parseBody(req);
+    const email = String(body.email || "").trim().toLowerCase();
+    const phone = String(body.phone || "").trim();
+    const password = String(body.password || "").trim();
+    const hostId = String(body.hostId || "host_nlv_001").trim();
+    const fullName = String(body.fullName || "New Las Vegas Ghana").trim();
+
+    if (!email || !phone || !password) {
+      return send(res, 400, { error: "VALIDATION_ERROR", message: "email, phone, and password are required" });
+    }
+
+    const passwordHash = createHash("sha256").update(password).digest("hex");
+    const existing = hostAccounts.get(hostId) || {};
+    const next = {
+      ...existing,
+      hostId,
+      fullName,
+      email,
+      phone,
+      passwordHash,
+      managedListingIds: Array.from(new Set([...(existing.managedListingIds || []), ...(body.managedListingIds || [])])),
+      updatedAt: new Date().toISOString(),
+      createdAt: existing.createdAt || new Date().toISOString()
+    };
+
+    hostAccounts.set(hostId, next);
+    persistRuntimeStore("host_account_upserted");
+    return send(res, 200, { message: "host account saved", hostId, email, phone, managedListingIds: next.managedListingIds });
+  }
+
+  if (req.method === "GET" && req.url?.match(/^\/v1\/host-accounts\/[^/]+$/)) {
+    const hostId = decodeURIComponent(req.url.split("/").pop());
+    const row = hostAccounts.get(hostId);
+    if (!row) return send(res, 404, { error: "NOT_FOUND", message: "host account not found" });
+    return send(res, 200, {
+      hostId: row.hostId,
+      fullName: row.fullName,
+      email: row.email,
+      phone: row.phone,
+      managedListingIds: row.managedListingIds || [],
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt
+    });
   }
 
   return send(res, 404, { error: "NOT_FOUND" });
