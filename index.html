@@ -161,24 +161,26 @@
     <section id="view-search" class="panel view active" aria-labelledby="search-title">
       <h2 id="search-title">Find your perfect stay</h2>
       <p class="muted">Search by destination, travel dates, and guest count to discover the best match.</p>
-      <div class="search-row">
-        <input id="search-destination" class="input" value="" placeholder="Destination" aria-label="Destination" />
-        <input id="search-dates" class="input" value="" placeholder="Dates" aria-label="Dates" />
-        <input id="search-guests" class="input" value="" placeholder="Guests" aria-label="Guests" />
-        <input id="search-type" class="input" value="" placeholder="Type" aria-label="Type" />
-        <button id="search-quote-btn" class="btn btn-primary" type="button">Get Live Quote</button>
-        <button id="show-all-units-btn" class="btn" type="button">Show all 8 units</button>
-      </div>
-      <p id="search-results-meta" class="muted">Ranking: recommended for your current filters.</p>
-      <div class="layout">
-        <article class="card">
-          <h3>Featured stays in Ghana</h3>
-          <div id="search-listings" class="listing-grid"></div>
-        </article>
-        <article class="card">
-          <span class="pill info">Selected listing</span>
-          <p id="selected-listing-summary" class="muted">Select a listing to continue.</p>
-        </article>
+      <div id="traveler-explore-core">
+        <div class="search-row">
+          <input id="search-destination" class="input" value="" placeholder="Destination" aria-label="Destination" />
+          <input id="search-dates" class="input" value="" placeholder="Dates" aria-label="Dates" />
+          <input id="search-guests" class="input" value="" placeholder="Guests" aria-label="Guests" />
+          <input id="search-type" class="input" value="" placeholder="Type" aria-label="Type" />
+          <button id="search-quote-btn" class="btn btn-primary" type="button">Get Live Quote</button>
+          <button id="show-all-units-btn" class="btn" type="button">Show all 8 units</button>
+        </div>
+        <p id="search-results-meta" class="muted">Ranking: recommended for your current filters.</p>
+        <div class="layout">
+          <article class="card">
+            <h3>Featured stays in Ghana</h3>
+            <div id="search-listings" class="listing-grid"></div>
+          </article>
+          <article class="card">
+            <span class="pill info">Selected listing</span>
+            <p id="selected-listing-summary" class="muted">Select a listing to continue.</p>
+          </article>
+        </div>
       </div>
 
       <div class="traveler-shell">
@@ -546,6 +548,7 @@
     const notifEventCancelledInput = document.getElementById('notif-event-cancelled');
     const notifQuietCriticalOnlyInput = document.getElementById('notif-quiet-critical-only');
     const notificationPrefsStatusEl = document.getElementById('notification-prefs-status');
+    const travelerExploreCoreEl = document.getElementById('traveler-explore-core');
     const searchDestinationInput = document.getElementById('search-destination');
     const searchDatesInput = document.getElementById('search-dates');
     const searchGuestsInput = document.getElementById('search-guests');
@@ -587,6 +590,7 @@
       const pane = ['explore','wishlists','trips','messages','profile'].includes(name) ? name : 'explore';
       travelerPanes.forEach(p => p.classList.toggle('active', p.dataset.pane === pane));
       travelerTabBtns.forEach(b => b.classList.toggle('active', b.dataset.travelerPane === pane));
+      if (travelerExploreCoreEl) travelerExploreCoreEl.style.display = pane === 'explore' ? '' : 'none';
       if (updateHash) {
         const query = location.hash.includes('?') ? location.hash.slice(location.hash.indexOf('?')) : '';
         const next = `#/search/${pane}${query}`;
